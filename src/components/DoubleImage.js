@@ -2,6 +2,8 @@ import React, { PureComponent } from 'react';
 
 import Image from './Image';
 
+const PADDING = 5;
+
 export default class DoubleImage extends PureComponent {
   onClick = () => {
     const { onImageClick, index } = this.props;
@@ -16,13 +18,21 @@ export default class DoubleImage extends PureComponent {
     const frontRotation = flipRotation;
     const backOpacity = tweenFlag ? 1 - flipOpacity : flipOpacity;
     const frontOpacity = tweenFlag ? flipOpacity : 0;
-    const useBackImage = true;
-    const userFrontImage = tweenFlag;
+    const frontImageKey = tweenFlag ? frontImage : 'unused';
+
     return (
-      <div className={className} style={{ width: width, height: height, top: row * height, left: col * width }} onClick={this.onClick}>
+      <div
+        className={className}
+        onClick={this.onClick}
+        style={{
+          width: width - 2 * PADDING,
+          height: height - 2 * PADDING,
+          top: row * height + PADDING,
+          left: col * width + PADDING
+        }}>
         <div className="double-image-inner">
-          <Image key={backImage} className="image-back" image={backImage} visible={useBackImage} flipRotation={backRotation} flipOpacity={backOpacity} />
-          <Image key={tweenFlag ? frontImage : 'unused'} className="image-front" image={frontImage} visible={userFrontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
+          <Image key={backImage} className="image-back" image={backImage} flipRotation={backRotation} flipOpacity={backOpacity} />
+          <Image key={frontImageKey} className="image-front" image={frontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
         </div>
       </div>
     );
