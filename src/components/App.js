@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import DoubleImage from './DoubleImage';
 
 import sizer from 'react-sizer';
+
+import DoubleImage from './DoubleImage';
 
 const DESIRED_COLUMN_WIDTH = 200;
 
@@ -21,8 +22,19 @@ class App extends Component {
     const columns = getColumnsForWidth(width);
     const imageWidth = Math.floor(width / columns);
     const imageHeight = getHeightForWidth(imageWidth);
+
+    const appStyle = {
+      width,
+      height,
+      position: 'relative',
+      width: '100%',
+      height: '100%',
+      minWidth: '100%',
+      minHeight: '100%'
+    };
+
     return (
-      <div className="app" style={{ width: width, height: height }}>
+      <div className="app" style={appStyle}>
         {images ? images.map((image, i) => {
           const frontImage = frontImages.get(i) ? baseUrl + frontImages.get(i) : null;
           const backImage = backImages.get(i) ? baseUrl + backImages.get(i) : null;

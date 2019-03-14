@@ -20,17 +20,27 @@ export default class DoubleImage extends PureComponent {
     const frontOpacity = tweenFlag ? flipOpacity : 0;
     const frontImageKey = tweenFlag ? frontImage : 'unused';
 
+    const doubleContainerStyle = {
+      width: width - 2 * PADDING,
+      height: height - 2 * PADDING,
+      position: 'absolute',
+      top: row * height + PADDING,
+      left: col * width + PADDING,
+    };
+
+    const doubleInnerStyle = {
+      position: 'relative',
+      transformStyle: 'preserve-3d',
+      width: '100%',
+      height: '100%'
+    };
+
     return (
       <div
         className={className}
         onClick={this.onClick}
-        style={{
-          width: width - 2 * PADDING,
-          height: height - 2 * PADDING,
-          top: row * height + PADDING,
-          left: col * width + PADDING
-        }}>
-        <div className="double-image-inner">
+        style={doubleContainerStyle}>
+        <div className="double-image-inner" style={doubleInnerStyle}>
           <Image key={backImage} className="image-back" image={backImage} flipRotation={backRotation} flipOpacity={backOpacity} />
           <Image key={frontImageKey} className="image-front" image={frontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
         </div>
