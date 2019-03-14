@@ -78,12 +78,19 @@ function tweenFlip({ index, image }) {
       const { start, final } = animationData;
       return {
         rotation: start.rotation + (final.rotation - start.rotation) * percentage,
+        // Fix for backface-visibility problems on Android and Firefox - https://github.com/facebook/react-native/issues/1973#issuecomment-262059217
         opacity: percentage < 0.5 ? start.opacity : final.opacity
       }
     },
     updateCallback: ({ rotation, opacity }) => {
       if (DEBUG) {
         console.log('update ' + index +  ' ' + image + ' ' + rotation + ' ' + opacity);
+      }
+      if (rotation < 90) {
+        // Preload the image cuz firefox is awesome
+        // At the end of animation when we set the background image src to the old front image src Firefox does not update immediately
+        // At 50% of the animation the background image is hidden anyway, so we can safely tell it early to start showing the front image to make the swap seamless
+        backImages.set(index, image);
       }
       flipRotations.set(index, rotation);
       flipOpacities.set(index, opacity);
