@@ -21,7 +21,22 @@ const tweenManager = getTweenManager(raf, ['Flip']);
 
 let RUN_TIMER = true;
 
-const imageLoader = new ImageLoader(baseUrl);
+const imageLoader = new ImageLoader(
+  baseUrl,
+  (url) =>
+    new Promise((resolve, reject) => {
+      try {
+        let loadingImage = new Image();
+        loadingImage.onload = () => {
+          resolve(loadingImage);
+        }
+        loadingImage.src = url;
+      }
+      catch (e) {
+        reject(e);
+      }
+    })
+);
 const flipRotations = new Map();
 const flipOpacities = new Map();
 const frontImages = new Map();

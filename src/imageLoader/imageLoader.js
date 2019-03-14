@@ -1,5 +1,6 @@
-export default function ImageLoader(baseUrl) {
+export default function ImageLoader(baseUrl, loadImagePromise) {
   this._baseUrl = baseUrl;
+  this._loadImagePromise = loadImagePromise;
   this._images = [];
   this._imagesLoadedByLocation = new Map();
   this._error = null;
@@ -39,14 +40,12 @@ ImageLoader.prototype = {
   },
 
   loadImage(imageLocation, index) {
-    let loadingImage = new Image();
-    loadingImage.onload = () => {
+    this._loadImagePromise(this._baseUrl + imageLocation).then(() => {
       this._imagesLoadedByLocation.set(imageLocation, true);
       if (this._onImageLoad) {
         this._onImageLoad(imageLocation, index);
       }
-    }
-    loadingImage.src = this._baseUrl + imageLocation;
+    });
   },
 
   loadImages(images) {
