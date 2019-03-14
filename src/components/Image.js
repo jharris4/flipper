@@ -2,13 +2,12 @@ import React, { Component } from 'react';
 
 export default class Image extends Component {
   render() {
-    const { image, visible, className, flipRotation, flipOpacity } = this.props;
+    const { image, className, flipRotation, flipOpacity } = this.props;
     const imageStyle = {
       transform: 'rotateY(' + flipRotation + 'deg)',
       perspective: 1000, // Fix for Android - https://facebook.github.io/react-native/docs/animations#bear-in-mind
       opacity: flipOpacity,
-      zIndex: flipOpacity < 0.5 ? 2 : 1,
-      visibility: visible ? 'visible' : 'hidden'
+      zIndex: flipOpacity < 0.5 ? 2 : 1
     };
     return (
       <div className={'image ' + className} style={imageStyle}>
