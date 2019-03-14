@@ -3,8 +3,11 @@ import DoubleImage from './DoubleImage';
 
 import sizer from 'react-sizer';
 
+const DESIRED_COLUMN_WIDTH = 200;
+
 function getColumnsForWidth(width) {
-  return width < 200 ? 1 : width < 500 ? 2 : width < 1200 ? 4 : 5;
+  // return width < 200 ? 1 : width < 500 ? 2 : width < 1200 ? 4 : 5;
+  return width < DESIRED_COLUMN_WIDTH ? 1 : Math.floor(width / DESIRED_COLUMN_WIDTH);
 }
 
 function getHeightForWidth(width) {
