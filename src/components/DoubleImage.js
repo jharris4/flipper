@@ -9,19 +9,22 @@ export default class DoubleImage extends Component {
   }
 
   render() {
-    const { frontImage, backImage, flipRotation, width, height, row, col, first, last } = this.props;
+    const { tweenFlag, frontImage, backImage, flipRotation, flipOpacity, width, height, row, col, first, last } = this.props;
     const firstLastClass = first ? 'first' : last ? 'last' : null;
     const className = 'double-image' + (firstLastClass ? ' ' + firstLastClass : '');
-    // const backClass = 'image-back';
-    const backClass = frontImage ? 'image-back' : 'image-front';
+    const backRotation = tweenFlag ? 180 - flipRotation : flipRotation;
+    const frontRotation = flipRotation;
+    const backOpacity = tweenFlag ? 1 - flipOpacity : flipOpacity;
+    const frontOpacity = flipOpacity
     return (
       <div className={className} style={{ width: width, height: height, top: row * height, left: col * width }} onClick={this.onClick}>
-        <div className="double-image-inner" style={{ transform: 'rotateY(' + flipRotation + 'deg)' }}>
-          <Image className={backClass} image={backImage}/>
+        <div className="double-image-inner">
+          {(tweenFlag || backImage) ? (
+            <Image className="image-back" image={backImage} front={false} flipRotation={backRotation} flipOpacity={backOpacity}/>
+           ): null}
           {frontImage ? (
-            <Image className="image-front" image={frontImage}/>
-          ) : null}
-          {/* <Image className={'image-front'} image={frontImage} /> */}
+            <Image className="image-front" image={frontImage} front={true} flipRotation={frontRotation} flipOpacity={frontOpacity}/>
+           ) : null}
         </div>
       </div>
     );

@@ -13,7 +13,8 @@ function getHeightForWidth(width) {
 
 class App extends Component {
   render() {
-    const { width, height, images, frontImages, backImages, flipRotations, baseUrl, loadedImages, onImageClick } = this.props;
+    const { width, height, images, tweenFlags, frontImages, backImages, flipRotations, flipOpacities,
+      baseUrl, loadedImages, onImageClick } = this.props;
     const columns = getColumnsForWidth(width);
     const imageWidth = Math.floor(width / columns);
     const imageHeight = getHeightForWidth(imageWidth);
@@ -23,10 +24,22 @@ class App extends Component {
           const frontImage = frontImages.get(i) ? baseUrl + frontImages.get(i) : null;
           const backImage = backImages.get(i) ? baseUrl + backImages.get(i) : null;
           return (
-            <DoubleImage key={i} index={i} frontImage={frontImage} backImage={backImage} flipRotation={flipRotations.get(i)} loaded={loadedImages.get(i)}
-              width={imageWidth} height={imageHeight} onImageClick={onImageClick}
-              row={Math.floor(i / columns)} col={i % columns}
-              first={i % columns === 0} last={i % columns === columns -1}/>
+            <DoubleImage
+              key={i}
+              index={i}
+              tweenFlag={tweenFlags.get(i)}
+              frontImage={frontImage}
+              backImage={backImage}
+              flipRotation={flipRotations.get(i)}
+              flipOpacity={flipOpacities.get(i)}
+              loaded={loadedImages.get(i)}
+              onImageClick={onImageClick}
+              width={imageWidth}
+              height={imageHeight}
+              row={Math.floor(i / columns)}
+              col={i % columns}
+              first={i % columns === 0}
+              last={i % columns === columns -1}/>
           )
         }) : null}
       </div>

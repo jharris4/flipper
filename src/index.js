@@ -14,13 +14,16 @@ const baseUrl = PUBLIC_PATH + 'data/';
 const manifestLocation = 'images.json'
 
 const FLIP_DURATION = 1000;
-const FLIP_INTERVAL = 3000;
+const FLIP_INTERVAL = 5000;
 const FLIP_DELAY = 5;
 
 const tweenManager = getTweenManager(raf, ['Flip']);
 
+let RUN_TIMER = true;
+
 const imageLoader = new ImageLoader(baseUrl);
 const flipRotations = new Map();
+const flipOpacities = new Map();
 const frontImages = new Map();
 const backImages = new Map();
 const tweenFlags = new Map();
@@ -32,7 +35,7 @@ imageLoader.onManifestLoad(images => {
 });
 imageLoader.onImageLoad((image, index) => {
   tweenFlip({ image, index });
-  if (imageLoader.allImagesLoaded) {
+  if (imageLoader.allImagesLoaded && RUN_TIMER) {
     setInterval(() => {
       const firstIndex = getRandomNonTweeningImageIndex();
       if (firstIndex !== void 0) {
@@ -53,6 +56,7 @@ function tweenFlip({ index, image }) {
   tweenFlags.set(index, true);
   frontImages.set(index, image);
   flipRotations.set(index, 180);
+  flipOpacities.set(index, 0);
   if (DEBUG) {
     console.log('start tween: ' + index)
   }
@@ -61,18 +65,28 @@ function tweenFlip({ index, image }) {
     delay: FLIP_DELAY,
     duration: FLIP_DURATION,
     animationData: {
-      start: 180,
-      final: 0
+      start: {
+        rotation: 180,
+        opacity: 0,
+      },
+      final: {
+        rotation: 0,
+        opacity: 1,
+      }
     },
     getDataForPercent: (animationData, percentage) => {
       const { start, final } = animationData;
-      return start + (final - start) * percentage;
+      return {
+        rotation: start.rotation + (final.rotation - start.rotation) * percentage,
+        opacity: percentage < 0.5 ? start.opacity : final.opacity
+      }
     },
-    updateCallback: rotation => {
+    updateCallback: ({ rotation, opacity }) => {
       if (DEBUG) {
-        console.log('update ' + index +  ' ' + image + ' ' + rotation);
+        console.log('update ' + index +  ' ' + image + ' ' + rotation + ' ' + opacity);
       }
       flipRotations.set(index, rotation);
+      flipOpacities.set(index, opacity);
       renderApp();
     },
     startCallback: () => {
@@ -89,6 +103,7 @@ function tweenFlip({ index, image }) {
       frontImages.delete(index);
       backImages.set(index, image);
       flipRotations.set(index, 0);
+      flipOpacities.set(index, 1);
       renderApp();
     }
   });
@@ -123,7 +138,7 @@ function onImageClick(index) {
 
 function renderApp() {
   render((
-    <App baseUrl={baseUrl} images={imageLoader.images} frontImages={frontImages} backImages={backImages} flipRotations={flipRotations} loadedImages={imageLoader.loadedImages} onImageClick={onImageClick}/>
+    <App baseUrl={baseUrl} images={imageLoader.images} tweenFlags={tweenFlags} frontImages={frontImages} backImages={backImages} flipRotations={flipRotations} flipOpacities={flipOpacities} loadedImages={imageLoader.loadedImages} onImageClick={onImageClick}/>
   ), container);
 }
 
