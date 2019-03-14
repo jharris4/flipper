@@ -1,0 +1,31 @@
+{
+  "name": "flipper",
+  "version": "0.9.0",
+  "description": "An image flipper demo",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.artsman.com/js/flipper.git"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Jon Harris",
+    "url": "https://github.com/jharris4"
+  },
+  "license": "MIT",
+  "main": "src/index.js",
+  "dependencies": {
+    "raf": "^3.4.1",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-sizer": "^1.0.6"
+  },
+  "devDependencies": {
+    "@porterjs/app": "^1.0.8"
+  },
+  "scripts": {
+    "clean": "porter-webpack-clean -L",
+    "deploy": "npm run clean && porter-webpack -L",
+    "deploy-run": "npm run clean && porter-webpack-express -L",
+    "dev": "porter-webpack-express-dev -L"
+  }
+}

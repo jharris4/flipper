@@ -1,0 +1,8 @@
+**.DS_store
+node_modules
+.idea
+**/dist
+**/es
+**/lib
+**/porter-local.js
+**/report.html
