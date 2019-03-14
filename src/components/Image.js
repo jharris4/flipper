@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 export default class Image extends Component {
   render() {
-    const { image, className, flipRotation, flipOpacity } = this.props;
+    const { width, height, image, className, flipRotation, flipOpacity } = this.props;
     const imageContainerStyle = {
       transform: 'rotateY(' + flipRotation + 'deg)',
       perspective: 1000, // Fix for Android - https://facebook.github.io/react-native/docs/animations#bear-in-mind
@@ -13,13 +13,13 @@ export default class Image extends Component {
       top: 0
     };
     const imageEmptyStyle = {
-      background: 'grey',
-      width: '100%',
-      height: '100%'
+      backgroundColor: 'grey',
+      width: width,
+      height: height
     }
     const imageStyle = {
-      width: '100%',
-      height: '100%'
+      width: width,
+      height: height
     };
     return (
       <div className={'image ' + className} style={imageContainerStyle}>
