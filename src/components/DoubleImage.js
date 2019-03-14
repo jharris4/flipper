@@ -21,8 +21,8 @@ export default class DoubleImage extends PureComponent {
     return (
       <div className={className} style={{ width: width, height: height, top: row * height, left: col * width }} onClick={this.onClick}>
         <div className="double-image-inner">
-          <Image className="image-back" image={backImage} visible={useBackImage} flipRotation={backRotation} flipOpacity={backOpacity} />
-          <Image className="image-front" image={frontImage} visible={userFrontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
+          <Image key={backImage} className="image-back" image={backImage} visible={useBackImage} flipRotation={backRotation} flipOpacity={backOpacity} />
+          <Image key={tweenFlag ? frontImage : 'unused'} className="image-front" image={frontImage} visible={userFrontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
         </div>
       </div>
     );
