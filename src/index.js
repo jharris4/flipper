@@ -90,7 +90,9 @@ function tweenFlip({ index, image }) {
         // Preload the image cuz firefox is awesome
         // At the end of animation when we set the background image src to the old front image src Firefox does not update immediately
         // At 50% of the animation the background image is hidden anyway, so we can safely tell it early to start showing the front image to make the swap seamless
-        backImages.set(index, image);
+
+        // #### Disabled because setting the key to the image on render seems to do the trick
+        // backImages.set(index, image);
       }
       flipRotations.set(index, rotation);
       flipOpacities.set(index, opacity);
