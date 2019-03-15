@@ -12,22 +12,35 @@
     "url": "https://github.com/jharris4"
   },
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "index.js",
   "dependencies": {
     "raf": "^3.4.1",
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4",
+    "react": "16.8.3",
+    "react-dom": "16.8.3",
     "react-sizer": "^1.0.6"
   },
   "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/runtime": "^7.3.4",
     "@porterjs/app": "^1.0.8",
+    "babel-jest": "^24.5.0",
+    "jest": "^24.5.0",
+    "metro-react-native-babel-preset": "^0.53.1",
     "react-native": "^0.59.1",
-    "react-native-image-cache-hoc": "^2.0.0"
+    "react-native-image-cache-hoc": "^2.0.0",
+    "react-test-renderer": "16.8.3"
   },
   "scripts": {
     "clean": "porter-webpack-clean -L",
     "deploy": "npm run clean && porter-webpack -L",
     "deploy-run": "npm run clean && porter-webpack-express -L",
-    "dev": "porter-webpack-express-dev -L"
+    "dev": "porter-webpack-express-dev -L",
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "run-ios": "react-native run-ios",
+    "run-android": "open scripts/Pixel_XL_API_28.command; react-native run-android",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "react-native"
   }
 }
