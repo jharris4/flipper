@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { AppRegistry, Dimensions, TouchableOpacity, View, Image} from 'react-native';
+import Orientation from 'react-native-orientation';
 import imageCacheHoc from 'react-native-image-cache-hoc';
 const CachedImage = imageCacheHoc(Image, { validProtocols: ['http', 'https'] });
 
@@ -16,10 +17,29 @@ const loadNativeImage = (url) => Image.prefetch(url);
 const BLANK_URL = ''; // 'https://blank.jpg'
 
 class Index extends Component {
-  render() {
-    const rootProps = {
+  constructor(props) {
+    super(props);
+    this.state = {
+      orientation: Orientation.getInitialOrientation(),
       width: Dimensions.get('window').width,
-      height: Dimensions.get('window').height,
+      height: Dimensions.get('window').height
+    };
+    Orientation.addOrientationListener(this.onOrientationChange);
+  }
+
+  onOrientationChange = () => {
+    this.setState({
+      orientation: Orientation.getInitialOrientation(),
+      width: Dimensions.get('window').width,
+      height: Dimensions.get('window').height
+    });
+  }
+
+  render() {
+    const { width, height } = this.state;
+    const rootProps = {
+      width,
+      height,
       baseUrl,
       manifestLocation,
       loadImage: loadNativeImage,

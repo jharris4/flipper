@@ -138,6 +138,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-orientation')
     implementation project(':rn-fetch-blob')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
