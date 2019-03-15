@@ -3,7 +3,10 @@ import { AppRegistry, TouchableOpacity, View, Image} from 'react-native';
 import imageCacheHoc from 'react-native-image-cache-hoc';
 const CachedImage = imageCacheHoc(Image);
 
-import Root from './components/Root';
+import { name as appName } from './app.json';
+import Root from './src/components/Root';
+
+const PUBLIC_PATH = '/static/flipper/';
 
 const baseUrl = PUBLIC_PATH + 'data/';
 const manifestLocation = 'images.json'
@@ -27,10 +30,6 @@ class Index extends Component {
     );
   }
 }
-
-render((
-  <Root {...rootProps} />
-));
 
 AppRegistry.registerComponent(appName, () => Index);
 
