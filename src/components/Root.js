@@ -181,12 +181,13 @@ export default class Root extends Component {
   }
 
   render() {
-    const { INTERACTIVE_VIEW, VIEW, IMAGE } = this.props;
+    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, IMAGE } = this.props;
     const { baseUrl } = this.props;
     const { imageLoader, indexState } = this.state;
     const { tweenFlags, frontImages, backImages, flipRotations, flipOpacities } = indexState;
     const appProps = {
       INTERACTIVE_VIEW,
+      INTERACTIVE_PROP,
       VIEW,
       IMAGE,
       baseUrl,
