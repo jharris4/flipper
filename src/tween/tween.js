@@ -1,21 +1,5 @@
-function getNow() {
-  let now;
-  if (typeof (window) !== 'undefined' && window.performance !== void 0 && window.performance.now !== void 0) {
-    now = window.performance.now.bind(window.performance);
-  }
-  else if (Date.now !== void 0) {
-    now = Date.now;
-  }
-  else {
-    now = function () {
-      return new Date().getTime();
-    };
-  }
-  return now;
-}
-
-function buildTweener(raf) {
-  const Tweener = Tweener || createTweener(raf);
+function buildTweener(raf, getNow, useFirstRaf, durationMultiple) {
+  const Tweener = Tweener || createTweener(raf, getNow, useFirstRaf, durationMultiple);
 
   if (Tweener._requestRaf === void 0) {
     Tweener._animationId = null;
@@ -40,7 +24,7 @@ function buildTweener(raf) {
   return Tweener;
 }
 
-function createTweener(raf) {
+function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
   const now = getNow();
 
   let _tweens = {};
@@ -97,12 +81,16 @@ function createTweener(raf) {
       isPlaying = true;
       onStartCallbackFired = false;
 
+      if (!now) {
+        console.error('tween - now missing!!!!');
+      }
+
       startTime = delay + (time !== void 0 ? time : now());
       return tween;
     }
 
     let start = function() {
-      if (now === Date.now) {
+      if (useFirstRaf || now === Date.now) {
         // Fix for older versions of Safari, and hopefully support for react-native raf!!
         raf((time) => { startWithTime(time); });
       }
@@ -122,7 +110,7 @@ function createTweener(raf) {
         onStartCallbackFired = true;
       }
 
-      let percentage = duration === 0 ? 1 : (time - startTime) / duration;
+      let percentage = duration === 0 ? 1 : (time - startTime) / duration * durationMultiple;
       percentage = percentage > 1 ? 1 : percentage;
 
       if (onUpdateCallback !== null) {
@@ -215,8 +203,8 @@ function createTweener(raf) {
   };
 }
 
-export function getTweenManager(raf, tweenTypes) {
-  const Tweener = buildTweener(raf);
+export function getTweenManager(raf, getNow, useFirstRaf, durationMultiple, tweenTypes) {
+  const Tweener = buildTweener(raf, getNow, useFirstRaf, durationMultiple);
 
   let tweensByType = {};
   let tweensKeyedByType = {};
