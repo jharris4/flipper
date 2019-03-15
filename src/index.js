@@ -1,7 +1,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 
+import sizer from 'react-sizer';
+
 import Root from './components/Root';
+const SizerRoot = sizer()(Root);
 
 import "./flipper.css";
 
@@ -31,10 +34,12 @@ const rootProps = {
   INTERACTIVE_VIEW: props => <div {...props}/>,
   INTERACTIVE_PROP: 'onClick',
   VIEW: props => <div {...props} />,
+  VIEW_TRANSFORM: (flipRotation) => 'rotateY(' + flipRotation + 'deg)',
   IMAGE: props => <img {...props} />,
-  IMAGE_PROP: 'src'
+  IMAGE_PROP: 'src',
+  IMAGE_SRC: image => image
 };
 
 render((
-  <Root {...rootProps}/>
+  <SizerRoot {...rootProps}/>
 ), container);

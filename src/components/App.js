@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 
-import sizer from 'react-sizer';
-
 import DoubleImage from './DoubleImage';
 
 const DESIRED_COLUMN_WIDTH = 200;
@@ -15,9 +13,9 @@ function getHeightForWidth(width) {
   return width * 1.25;
 }
 
-class App extends Component {
+export default class App extends Component {
   render() {
-    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, IMAGE, IMAGE_PROP } = this.props;
+    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
     const { width, height, images, tweenFlags, frontImages, backImages, flipRotations, flipOpacities,
       baseUrl, loadedImages, onImageClick } = this.props;
     const columns = getColumnsForWidth(width);
@@ -38,8 +36,10 @@ class App extends Component {
       INTERACTIVE_VIEW,
       INTERACTIVE_PROP,
       VIEW,
+      VIEW_TRANSFORM,
       IMAGE,
-      IMAGE_PROP
+      IMAGE_PROP,
+      IMAGE_SRC
     };
 
     return (
@@ -71,5 +71,3 @@ class App extends Component {
     );
   }
 }
-
-export default sizer()(App);

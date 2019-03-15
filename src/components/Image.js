@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 
 export default class Image extends Component {
   render() {
-    const { VIEW, IMAGE, IMAGE_PROP } = this.props;
+    const { VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
     const { width, height, image, className, flipRotation, flipOpacity } = this.props;
     const imageContainerStyle = {
-      transform: 'rotateY(' + flipRotation + 'deg)',
+      transform: VIEW_TRANSFORM(flipRotation),
       perspective: 1000, // Fix for Android - https://facebook.github.io/react-native/docs/animations#bear-in-mind
       opacity: flipOpacity,
       zIndex: flipOpacity < 0.5 ? 2 : 1,
@@ -25,7 +25,7 @@ export default class Image extends Component {
     return (
       <VIEW className={'image ' + className} style={imageContainerStyle}>
         {image ? (
-          <IMAGE {...{[IMAGE_PROP]: image}} style={imageStyle}/>
+          <IMAGE {...{[IMAGE_PROP]: IMAGE_SRC(image)}} style={imageStyle}/>
         ) : (
             <VIEW className="image-empty" style={imageEmptyStyle}/>
         )}
