@@ -59,7 +59,7 @@ ImageLoader.prototype = {
 
   loadError(error) {
     this._error = error;
-    console.error(error);
+    console.error('imageLoader loadError: ' + error);
   },
 
   loadManifest(manifestLocation) {
