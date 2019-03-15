@@ -24,6 +24,15 @@ const loadWebImage = (url) =>
     }
   });
 
+const rootProps = {
+  baseUrl,
+  manifestLocation,
+  loadImage: loadWebImage,
+  INTERACTIVE_VIEW: props => <div {...props}/>,
+  VIEW: props => <div {...props} />,
+  IMAGE: props => <img {...props} />
+};
+
 render((
-  <Root baseUrl={baseUrl} manifestLocation={manifestLocation} loadImage={loadWebImage}/>
+  <Root {...rootProps}/>
 ), container);

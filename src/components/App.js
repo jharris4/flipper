@@ -17,6 +17,7 @@ function getHeightForWidth(width) {
 
 class App extends Component {
   render() {
+    const { INTERACTIVE_VIEW, VIEW, IMAGE } = this.props;
     const { width, height, images, tweenFlags, frontImages, backImages, flipRotations, flipOpacities,
       baseUrl, loadedImages, onImageClick } = this.props;
     const columns = getColumnsForWidth(width);
@@ -34,13 +35,16 @@ class App extends Component {
     };
 
     return (
-      <div className="app" style={appStyle}>
+      <VIEW className="app" style={appStyle}>
         {images ? images.map((image, i) => {
           const frontImage = frontImages.get(i) ? baseUrl + frontImages.get(i) : null;
           const backImage = backImages.get(i) ? baseUrl + backImages.get(i) : null;
           return (
             <DoubleImage
               key={i}
+              INTERACTIVE_VIEW={INTERACTIVE_VIEW}
+              VIEW={VIEW}
+              IMAGE={IMAGE}
               index={i}
               tweenFlag={tweenFlags.get(i)}
               frontImage={frontImage}
@@ -57,7 +61,7 @@ class App extends Component {
               last={i % columns === columns -1}/>
           )
         }) : null}
-      </div>
+      </VIEW>
     );
   }
 }

@@ -11,6 +11,7 @@ export default class DoubleImage extends PureComponent {
   }
 
   render() {
+    const { INTERACTIVE_VIEW, VIEW, IMAGE } = this.props;
     const { index, tweenFlag, frontImage, backImage, flipRotation, flipOpacity, width, height, row, col, first, last } = this.props;
     const firstLastClass = first ? 'first' : last ? 'last' : null;
     const className = 'double-image' + (firstLastClass ? ' ' + firstLastClass : '');
@@ -38,16 +39,23 @@ export default class DoubleImage extends PureComponent {
       height: '100%'
     };
 
+    const imageProps = {
+      VIEW,
+      IMAGE,
+      width: innerWidth,
+      height: innerHeight
+    };
+
     return (
-      <div
+      <INTERACTIVE_VIEW
         className={className}
         onClick={this.onClick}
         style={doubleContainerStyle}>
-        <div className="double-image-inner" style={doubleInnerStyle}>
-          <Image key={backImage} width={innerWidth} height={innerHeight} className="image-back" image={backImage} flipRotation={backRotation} flipOpacity={backOpacity} />
-          <Image key={frontImageKey} width={innerWidth} height={innerHeight} className="image-front" image={frontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
-        </div>
-      </div>
+        <VIEW className="double-image-inner" style={doubleInnerStyle}>
+          <Image key={backImage} {...imageProps} className="image-back" image={backImage} flipRotation={backRotation} flipOpacity={backOpacity} />
+          <Image key={frontImageKey} {...imageProps} className="image-front" image={frontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
+        </VIEW>
+      </INTERACTIVE_VIEW>
     );
   }
 }

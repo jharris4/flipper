@@ -181,13 +181,26 @@ export default class Root extends Component {
   }
 
   render() {
+    const { INTERACTIVE_VIEW, VIEW, IMAGE } = this.props;
     const { baseUrl } = this.props;
     const { imageLoader, indexState } = this.state;
     const { tweenFlags, frontImages, backImages, flipRotations, flipOpacities } = indexState;
+    const appProps = {
+      INTERACTIVE_VIEW,
+      VIEW,
+      IMAGE,
+      baseUrl,
+      images: imageLoader.images,
+      tweenFlags,
+      frontImages,
+      backImages,
+      flipRotations,
+      flipOpacities,
+      loadedImages: imageLoader.loadedImages,
+      onImageClick: this.onImageClick
+    };
     return (
-      <App baseUrl={baseUrl} images={imageLoader.images}
-        tweenFlags={tweenFlags} frontImages={frontImages} backImages={backImages}
-        flipRotations={flipRotations} flipOpacities={flipOpacities} loadedImages={imageLoader.loadedImages} onImageClick={this.onImageClick} />
+      <App {...appProps} />
     );
   }
 }

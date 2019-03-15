@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 export default class Image extends Component {
   render() {
+    const { VIEW, IMAGE } = this.props;
     const { width, height, image, className, flipRotation, flipOpacity } = this.props;
     const imageContainerStyle = {
       transform: 'rotateY(' + flipRotation + 'deg)',
@@ -22,13 +23,13 @@ export default class Image extends Component {
       height: height
     };
     return (
-      <div className={'image ' + className} style={imageContainerStyle}>
+      <VIEW className={'image ' + className} style={imageContainerStyle}>
         {image ? (
-          <img src={image} style={imageStyle}/>
+          <IMAGE src={image} style={imageStyle}/>
         ) : (
-          <div className="image-empty" style={imageEmptyStyle}/>
+            <VIEW className="image-empty" style={imageEmptyStyle}/>
         )}
-      </div>
+      </VIEW>
     );
   }
 }
