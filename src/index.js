@@ -31,7 +31,8 @@ const rootProps = {
   INTERACTIVE_VIEW: props => <div {...props}/>,
   INTERACTIVE_PROP: 'onClick',
   VIEW: props => <div {...props} />,
-  IMAGE: props => <img {...props} />
+  IMAGE: props => <img {...props} />,
+  IMAGE_PROP: 'src'
 };
 
 render((

@@ -19,7 +19,8 @@ class Index extends Component {
       INTERACTIVE_VIEW: props => <TouchableOpacity {...props} />,
       INTERACTIVE_PROP: 'onPress',
       VIEW: props => <View {...props} />,
-      IMAGE: props => <CachedImage {...props} />
+      IMAGE: props => <CachedImage {...props} />,
+      IMAGE_PROP: 'source'
     };
     return (
       <Root {...rootProps} />

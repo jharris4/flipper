@@ -11,7 +11,7 @@ export default class DoubleImage extends PureComponent {
   }
 
   render() {
-    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, IMAGE } = this.props;
+    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, IMAGE, IMAGE_PROP } = this.props;
     const { index, tweenFlag, frontImage, backImage, flipRotation, flipOpacity, width, height, row, col, first, last } = this.props;
     const firstLastClass = first ? 'first' : last ? 'last' : null;
     const className = 'double-image' + (firstLastClass ? ' ' + firstLastClass : '');
@@ -42,6 +42,7 @@ export default class DoubleImage extends PureComponent {
     const imageProps = {
       VIEW,
       IMAGE,
+      IMAGE_PROP,
       width: innerWidth,
       height: innerHeight
     };
