@@ -20,7 +20,9 @@
     "react-sizer": "^1.0.6"
   },
   "devDependencies": {
-    "@porterjs/app": "^1.0.8"
+    "@porterjs/app": "^1.0.8",
+    "react-native": "^0.59.1",
+    "react-native-image-cache-hoc": "^2.0.0"
   },
   "scripts": {
     "clean": "porter-webpack-clean -L",
