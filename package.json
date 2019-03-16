@@ -39,6 +39,10 @@
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "run-ios": "react-native run-ios",
     "run-ios-release": "react-native run-ios --configuration release",
+    "run-ios-phone": "react-native run-ios --simulator=\"iPhone X\"",
+    "run-ios-phone-release": "react-native run-ios --simulator=\"iPhone X\" --configuration release",
+    "run-ios-ipad": "react-native run-ios --simulator=\"iPad Air 2\"",
+    "run-ios-ipad-release": "react-native run-ios --simulator=\"iPad Air 2\" --configuration release",
     "run-android": "open scripts/Pixel_XL_API_28.command; react-native run-android",
     "test": "jest"
   },
