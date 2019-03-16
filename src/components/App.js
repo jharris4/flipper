@@ -15,21 +15,21 @@ function getHeightForWidth(width) {
 
 export default class App extends Component {
   render() {
-    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
+    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
     const { width, height, images, tweenFlags, frontImages, backImages, flipRotations, flipOpacities,
       baseUrl, loadedImages, onImageClick } = this.props;
     const columns = getColumnsForWidth(width);
+    const rows = Math.ceil(images.length / columns);
     const imageWidth = Math.floor(width / columns);
     const imageHeight = getHeightForWidth(imageWidth);
+    const rowsHeight = rows * imageHeight;
 
     const appStyle = {
       width,
-      height,
+      height: rowsHeight,
       position: 'relative',
-      width: '100%',
-      height: '100%',
-      minWidth: '100%',
-      minHeight: '100%'
+      minWidth: width,
+      minHeight: height
     };
 
     const doubleImageProps = {
@@ -43,7 +43,7 @@ export default class App extends Component {
     };
 
     return (
-      <VIEW className="app" style={appStyle}>
+      <SCROLL_VIEW className="app" style={appStyle}>
         {images ? images.map((image, i) => {
           const frontImage = frontImages.get(i) ? baseUrl + frontImages.get(i) : null;
           const backImage = backImages.get(i) ? baseUrl + backImages.get(i) : null;
@@ -67,7 +67,7 @@ export default class App extends Component {
               last={i % columns === columns -1}/>
           )
         }) : null}
-      </VIEW>
+      </SCROLL_VIEW>
     );
   }
 }

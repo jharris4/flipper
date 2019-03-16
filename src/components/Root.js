@@ -179,11 +179,12 @@ export default class Root extends Component {
   }
 
   render() {
-    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
+    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
     const { width, height, baseUrl } = this.props;
     const { imageLoader, indexState } = this.state;
     const { tweenFlags, frontImages, backImages, flipRotations, flipOpacities } = indexState;
     const appProps = {
+      SCROLL_VIEW,
       INTERACTIVE_VIEW,
       INTERACTIVE_PROP,
       VIEW,

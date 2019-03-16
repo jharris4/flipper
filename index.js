@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, Dimensions, TouchableOpacity, View, Image} from 'react-native';
+import { AppRegistry, Dimensions, TouchableOpacity, View, Image, ScrollView } from 'react-native';
 import Orientation from 'react-native-orientation';
 import imageCacheHoc from 'react-native-image-cache-hoc';
 const CachedImage = imageCacheHoc(Image, { validProtocols: ['http', 'https'] });
@@ -50,7 +50,8 @@ class Index extends Component {
       RAF: requestAnimationFrame,
       GET_NOW: () => Date.now,
       USE_FIRST_RAF: true,
-      DURATION_MULTIPLE: 10,
+      DURATION_MULTIPLE: 1,
+      SCROLL_VIEW: props => <View style={{width: width, height: height}}><ScrollView {...{ ...props, contentContainerStyle: { width: width, height: props.style.height } }} /></View>,
       INTERACTIVE_VIEW: props => <TouchableOpacity {...props} />,
       INTERACTIVE_PROP: 'onPress',
       VIEW: props => <View {...props} />,

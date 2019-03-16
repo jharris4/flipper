@@ -57,6 +57,7 @@ const rootProps = {
   GET_NOW: getNow,
   USE_FIRST_RAF: false,
   DURATION_MULTIPLE: 1,
+  SCROLL_VIEW: props => <div {...props} />,
   INTERACTIVE_VIEW: props => <div {...props}/>,
   INTERACTIVE_PROP: 'onClick',
   VIEW: props => <div {...props} />,
