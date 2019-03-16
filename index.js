@@ -25,9 +25,18 @@ class Index extends Component {
       height: Dimensions.get('window').height
     };
     Orientation.addOrientationListener(this.onOrientationChange);
+    Dimensions.addEventListener("change", this.onDimensionsChange);
   }
 
-  onOrientationChange = () => {
+  onDimensionsChange = (e) => {
+    this.setState({
+      orientation: Orientation.getInitialOrientation(),
+      width: Dimensions.get('window').width,
+      height: Dimensions.get('window').height
+    });
+  }
+
+  onOrientationChange = (e) => {
     this.setState({
       orientation: Orientation.getInitialOrientation(),
       width: Dimensions.get('window').width,
