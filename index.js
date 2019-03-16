@@ -73,6 +73,11 @@ class Index extends Component {
       <Root {...rootProps} />
     );
   }
+
+  componentWillUnmount() {
+    Orientation.removeOrientationListener(this.onOrientationChange);
+    Dimensions.removeEventListener("change", this.onDimensionsChange);
+  }
 }
 
 AppRegistry.registerComponent(appName, () => Index);
