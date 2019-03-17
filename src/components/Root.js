@@ -10,20 +10,25 @@ export default class Root extends Component {
   constructor(props) {
     super(props);
     const { RAF, GET_NOW, USE_FIRST_RAF, DURATION_MULTIPLE } = props;
-    const { baseUrl, manifestLocation, loadImage, flipDelay, flipDuration, flipInterval, runTimer } = props;
+    const { baseUrl, manifestLocation, loadImage, flipInterval, runTimer } = props;
     const imageLoader = new ImageLoader(baseUrl, loadImage);
     imageLoader.onManifestLoad(images => {
-      const { indexState } = this.state;
-      const { flipRotations, flipOpacities } = indexState;
-      for (let image of images) {
-        flipRotations.set(image, 0);
-        flipOpacities.set(image, 1);
-      }
-      this.setState(state => ({...state, indexState: {
-        ...state.indexState,
-        flipRotations: new Map(flipRotations),
-        flipOpacities: new Map(flipOpacities)
-      }}));
+      this.setState(state => {
+        const { indexState } = state;
+        const { flipRotations, flipOpacities } = indexState;
+        const imagesLength = images.length;
+        for (let i = 0; i < imagesLength; i++) {
+          flipRotations.set(i, 0);
+          flipOpacities.set(i, 1);
+        }
+        return {
+          ...state, indexState: {
+            ...state.indexState,
+            flipRotations: new Map(flipRotations),
+            flipOpacities: new Map(flipOpacities)
+          }
+        };
+      });
     });
     imageLoader.onImageLoad((image, index) => {
       this.tweenFlip({ image, index });
