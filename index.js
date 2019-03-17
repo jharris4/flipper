@@ -7,9 +7,12 @@ const CachedImage = imageCacheHoc(Image, { validProtocols: ['http', 'https'] });
 import { name as appName } from './app.json';
 import Root from './src/components/Root';
 
-const SERVER_PATH = 'http://127.0.0.1:1234/static/flipper/data/';
+// ios 127.0.0.1 works, but for android it points to the device
+// Your ip below must also be specified in android/app/src/debug/res/xml/react_native_config.xml
+const SERVER_HOST = '192.168.1.14';
+const SERVER_PATH = 'http://' + SERVER_HOST + ':1234/static/flipper/data/';
 
-const baseUrl = SERVER_PATH;
+const baseUrl = SERVER_PATH
 const manifestLocation = 'images.json'
 
 const loadNativeImage = (url) => Image.prefetch(url);
@@ -64,7 +67,7 @@ class Index extends Component {
       INTERACTIVE_VIEW: props => <TouchableOpacity {...props} />,
       INTERACTIVE_PROP: 'onPress',
       VIEW: props => <View {...props} />,
-      VIEW_TRANSFORM: (flipRotation) => [{ rotateY:  flipRotation + 'deg' }],
+      VIEW_TRANSFORM: (flipRotation) => [{ rotateY: flipRotation + 'deg' }],
       IMAGE: props => <CachedImage {...props} />,
       IMAGE_PROP: 'source',
       IMAGE_SRC: image => ({ uri: image ? image : BLANK_URL })
