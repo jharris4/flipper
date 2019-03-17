@@ -5,6 +5,7 @@ function buildTweener(raf, getNow, useFirstRaf, durationMultiple) {
     Tweener._animationId = null;
     Tweener._rafCallback = function (ts) {
       if (!ts) {
+        // console.error('no ts on raf: ' + JSON.stringify(ts));
         ts = +(new Date());
       }
       if (Tweener.update(ts)) {
@@ -45,7 +46,7 @@ function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
     let tweenIds = Object.keys(_tweens);
 
     if (tweenIds.length === 0) {
-      return false;
+      return false; // raf callback loop will stop
     }
 
     time = time !== void 0 ? time : now();
@@ -61,7 +62,7 @@ function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
 
       tweenIds = Object.keys(_pendingTweens);
     }
-    return true;
+    return true; // raf callback loop will continue
   }
 
   let create = function (duration, delay = 0) {
@@ -90,8 +91,9 @@ function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
     }
 
     let start = function() {
-      if (useFirstRaf || now === Date.now) {
-        // Fix for older versions of Safari, and hopefully support for react-native raf!!
+      if (useFirstRaf) {
+        // Used to fix older versions of Safari
+        // TODO - the raf call id should be cancelable or tracked
         raf((time) => { startWithTime(time); });
       }
       else {

@@ -45,7 +45,7 @@ export default class Root extends Component {
     this.tweenManager = getTweenManager(RAF, GET_NOW, USE_FIRST_RAF, DURATION_MULTIPLE, ['Flip']);
   }
 
-  startTimer() {
+  startTimer = () => {
     const { indexState } = this.state;
     const { backImages } = indexState;
     const firstIndex = this.getRandomNonTweeningImageIndex();
