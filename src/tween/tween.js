@@ -82,11 +82,7 @@ function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
       isPlaying = true;
       onStartCallbackFired = false;
 
-      if (!now) {
-        console.error('tween - now missing!!!!');
-      }
-
-      startTime = delay + (time !== void 0 ? time : now());
+      startTime = delay + time;
       return tween;
     }
 
@@ -97,7 +93,7 @@ function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
         raf((time) => { startWithTime(time); });
       }
       else {
-        startWithTime();
+        startWithTime(now());
       }
     }
 
