@@ -57,9 +57,9 @@ ImageLoader.prototype = {
     }
   },
 
-  loadError(error) {
+  loadError(error, manifestLocation) {
     this._error = error;
-    console.error('imageLoader loadError: ' + error);
+    console.log('imageLoader loadError: ' + error.message + ' ' + this._baseUrl + manifestLocation);
   },
 
   loadManifest(manifestLocation) {
@@ -72,7 +72,7 @@ ImageLoader.prototype = {
         this.loadImages(data.images);
       })
       .catch(error => {
-        this.loadError(error);
+        this.loadError(error, manifestLocation);
       });
   }
 };
