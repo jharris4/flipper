@@ -9,7 +9,7 @@ import Root from './src/components/Root';
 
 // ios 127.0.0.1 works, but for android it points to the device
 // Your ip below must also be specified in android/app/src/debug/res/xml/react_native_config.xml
-const SERVER_HOST = '192.168.1.14';
+const SERVER_HOST = '192.168.1.14'; // '127.0.0.1';
 const SERVER_PATH = 'http://' + SERVER_HOST + ':1234/static/flipper/data/';
 
 const baseUrl = SERVER_PATH
@@ -62,7 +62,6 @@ class Index extends Component {
       RAF: requestAnimationFrame,
       GET_NOW: () => Date.now,
       USE_FIRST_RAF: false,
-      DURATION_MULTIPLE: 1,
       SCROLL_VIEW: props => <View style={{width: width, height: height}}><ScrollView {...{ ...props, contentContainerStyle: { width: width, height: props.style.height } }} /></View>,
       INTERACTIVE_VIEW: props => <TouchableOpacity {...props} />,
       INTERACTIVE_PROP: 'onPress',

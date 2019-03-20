@@ -1,5 +1,5 @@
-function buildTweener(raf, getNow, useFirstRaf, durationMultiple) {
-  const Tweener = Tweener || createTweener(raf, getNow, useFirstRaf, durationMultiple);
+function buildTweener(raf, getNow, useFirstRaf) {
+  const Tweener = Tweener || createTweener(raf, getNow, useFirstRaf);
 
   if (Tweener._requestRaf === void 0) {
     Tweener._animationId = null;
@@ -25,7 +25,7 @@ function buildTweener(raf, getNow, useFirstRaf, durationMultiple) {
   return Tweener;
 }
 
-function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
+function createTweener(raf, getNow, useFirstRaf) {
   const now = getNow();
 
   let _tweens = {};
@@ -108,7 +108,7 @@ function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
         onStartCallbackFired = true;
       }
 
-      let percentage = duration === 0 ? 1 : (time - startTime) / duration * durationMultiple;
+      let percentage = duration === 0 ? 1 : (time - startTime) / duration;
       percentage = percentage > 1 ? 1 : percentage;
 
       if (onUpdateCallback !== null) {
@@ -201,8 +201,8 @@ function createTweener(raf, getNow, useFirstRaf, durationMultiple) {
   };
 }
 
-export function getTweenManager(raf, getNow, useFirstRaf, durationMultiple, tweenTypes) {
-  const Tweener = buildTweener(raf, getNow, useFirstRaf, durationMultiple);
+export function getTweenManager(raf, getNow, useFirstRaf, tweenTypes) {
+  const Tweener = buildTweener(raf, getNow, useFirstRaf);
 
   let tweensByType = {};
   let tweensKeyedByType = {};

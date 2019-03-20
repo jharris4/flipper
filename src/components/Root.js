@@ -9,10 +9,11 @@ const DEBUG = false;
 export default class Root extends Component {
   constructor(props) {
     super(props);
-    const { RAF, GET_NOW, USE_FIRST_RAF, DURATION_MULTIPLE } = props;
+    const { RAF, GET_NOW, USE_FIRST_RAF } = props;
     const { baseUrl, manifestLocation, loadImage, flipInterval, runTimer } = props;
     const imageLoader = new ImageLoader(baseUrl, loadImage);
     imageLoader.onManifestLoad(images => {
+      // when images load, set the initial flipRotation and flipOpacity for each index
       this.setState(state => {
         const { indexState } = state;
         const { flipRotations, flipOpacities } = indexState;
@@ -31,23 +32,25 @@ export default class Root extends Component {
       });
     });
     imageLoader.onImageLoad((image, index) => {
+      // as each image loads, start a flip animation on it
       this.tweenFlip({ image, index });
       if (imageLoader.allImagesLoaded && runTimer) {
         this.timerIntervalID = setInterval(this.startTimer, flipInterval);
       }
     });
+    // load the list of images
     imageLoader.loadManifest(manifestLocation);
     this.state = {
       imageLoader: imageLoader,
       indexState: {
-        tweenFlags: new Map(),
-        frontImages: new Map(),
-        backImages: new Map(),
-        flipRotations: new Map(),
-        flipOpacities: new Map()
+        tweenFlags: new Map(),    // Map of index to tweenFlag
+        frontImages: new Map(),   // Map of index to frontImage (only used when tweenFlag === true)
+        backImages: new Map(),    // Map of index to backImage
+        flipRotations: new Map(), // Map of index to flipRotation
+        flipOpacities: new Map()  // Map of index to flipOpacity
       }
     };
-    this.tweenManager = getTweenManager(RAF, GET_NOW, USE_FIRST_RAF, DURATION_MULTIPLE, ['Flip']);
+    this.tweenManager = getTweenManager(RAF, GET_NOW, USE_FIRST_RAF, ['Flip']);
   }
 
   startTimer = () => {
@@ -79,6 +82,12 @@ export default class Root extends Component {
     }
   }
 
+  /**
+   * Starts a tween to flip the given index to show the given image
+   * @param {Object} flipInfo - The flipInfo.
+   * @param {number} flipInfo.index The index to flip.
+   * @param {string} flipInfo.image The image to flip in.
+  */
   tweenFlip = ({ index, image }) => {
     const { flipDelay, flipDuration } = this.props;
     const { indexState } = this.state;

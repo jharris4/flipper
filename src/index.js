@@ -56,7 +56,6 @@ const rootProps = {
   RAF: raf,
   GET_NOW: getNow,
   USE_FIRST_RAF: getNow() === Date.now,
-  DURATION_MULTIPLE: 1,
   SCROLL_VIEW: props => <div {...props} />,
   INTERACTIVE_VIEW: props => <div {...props}/>,
   INTERACTIVE_PROP: 'onClick',
