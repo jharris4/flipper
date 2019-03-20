@@ -59,6 +59,7 @@ class Index extends Component {
       flipDuration: 1000,
       flipInterval: 5000,
       runTimer: true,
+      SET_VALUE: v => v,
       RAF: requestAnimationFrame,
       GET_NOW: () => Date.now,
       USE_FIRST_RAF: false,
@@ -68,9 +69,11 @@ class Index extends Component {
       VIEW: props => <View {...props} />,
       VIEW_TRANSFORM: (flipRotation) => [{ rotateY: flipRotation + 'deg' }],
       IMAGE: props => <CachedImage {...props} />,
+      IMAGE_VIEW: props => <View {...props} />,
       IMAGE_PROP: 'source',
       IMAGE_SRC: image => ({ uri: image ? image : BLANK_URL })
     };
+
     return (
       <Root {...rootProps} />
     );

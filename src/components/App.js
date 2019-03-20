@@ -15,7 +15,7 @@ function getHeightForWidth(width) {
 
 export default class App extends Component {
   render() {
-    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
+    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_VIEW, IMAGE_PROP, IMAGE_SRC } = this.props;
     const { width, height, images, tweenFlags, frontImages, backImages, flipRotations, flipOpacities,
       baseUrl, loadedImages, onImageClick } = this.props;
     const columns = getColumnsForWidth(width);
@@ -38,6 +38,7 @@ export default class App extends Component {
       VIEW,
       VIEW_TRANSFORM,
       IMAGE,
+      IMAGE_VIEW,
       IMAGE_PROP,
       IMAGE_SRC
     };

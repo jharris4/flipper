@@ -53,6 +53,7 @@ const rootProps = {
   flipDuration: 1000,
   flipInterval: 5000,
   runTimer: true,
+  SET_VALUE: v => v,
   RAF: raf,
   GET_NOW: getNow,
   USE_FIRST_RAF: getNow() === Date.now,
@@ -62,6 +63,7 @@ const rootProps = {
   VIEW: props => <div {...props} />,
   VIEW_TRANSFORM: (flipRotation) => 'rotateY(' + flipRotation + 'deg)',
   IMAGE: props => <img {...props} />,
+  IMAGE_VIEW: props => <div {...props} />,
   IMAGE_PROP: 'src',
   IMAGE_SRC: image => image
 };
