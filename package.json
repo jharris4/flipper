@@ -44,6 +44,7 @@
     "run-ios-ipad": "react-native run-ios --simulator=\"iPad Air 2\"",
     "run-ios-ipad-release": "react-native run-ios --simulator=\"iPad Air 2\" --configuration release",
     "run-android": "open scripts/Pixel_XL_API_28.command; react-native run-android",
+    "run-android-release": "open scripts/Pixel_XL_API_28.command; react-native run-android --variant=release",
     "test": "jest"
   },
   "jest": {
