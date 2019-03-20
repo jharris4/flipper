@@ -10,39 +10,17 @@ export default class Root extends Component {
   constructor(props) {
     super(props);
     const { RAF, GET_NOW, USE_FIRST_RAF } = props;
-    const { baseUrl, manifestLocation, loadImage, flipInterval, runTimer } = props;
+    const { baseUrl, manifestLocation, loadImage } = props;
     const imageLoader = new ImageLoader(baseUrl, loadImage);
-    imageLoader.onManifestLoad(images => {
-      // when images load, set the initial flipRotation and flipOpacity for each index
-      this.setState(state => {
-        const { indexState } = state;
-        const { flipRotations, flipOpacities } = indexState;
-        const imagesLength = images.length;
-        for (let i = 0; i < imagesLength; i++) {
-          flipRotations.set(i, 0);
-          flipOpacities.set(i, 1);
-        }
-        return {
-          ...state, indexState: {
-            ...state.indexState,
-            flipRotations: new Map(flipRotations),
-            flipOpacities: new Map(flipOpacities)
-          }
-        };
-      });
-    });
-    imageLoader.onImageLoad((image, index) => {
-      // as each image loads, start a flip animation on it
-      this.tweenFlip({ image, index });
-      if (imageLoader.allImagesLoaded && runTimer) {
-        this.timerIntervalID = setInterval(this.startTimer, flipInterval);
-      }
-    });
+    imageLoader.onManifestLoad(this.onManifestLoad);
+    imageLoader.onImageLoad(this.onImageLoad);
     // load the list of images
     imageLoader.loadManifest(manifestLocation);
     this.state = {
-      imageLoader: imageLoader,
+      images: [],                 // Array of images
       indexState: {
+        loadedCount: 0,           // Number of loaded images
+        loadedImages: new Map(),  // Map of index to imageLoadedFlag
         tweenFlags: new Map(),    // Map of index to tweenFlag
         frontImages: new Map(),   // Map of index to frontImage (only used when tweenFlag === true)
         backImages: new Map(),    // Map of index to backImage
@@ -51,6 +29,51 @@ export default class Root extends Component {
       }
     };
     this.tweenManager = getTweenManager(RAF, GET_NOW, USE_FIRST_RAF, ['Flip']);
+  }
+
+  onManifestLoad = images => {
+    // when images load, set the initial flipRotation and flipOpacity for each index
+    this.setState(state => {
+      const { SET_VALUE } = this.props;
+      const { indexState } = state;
+      const { flipRotations, flipOpacities, loadedImages } = indexState;
+      const imagesLength = images.length;
+      for (let i = 0; i < imagesLength; i++) {
+        flipRotations.set(i, SET_VALUE(0));
+        flipOpacities.set(i, SET_VALUE(1));
+        loadedImages.set(i, false);
+      }
+      return {
+        ...state,
+        images,
+        indexState: {
+          ...state.indexState,
+          flipRotations: new Map(flipRotations),
+          flipOpacities: new Map(flipOpacities),
+          loadedImages: new Map(loadedImages),
+          loadedCount: 0
+        }
+      };
+    });
+  }
+
+  onImageLoad = (image, index) => {
+    // as each image loads, start a flip animation on it
+    this.tweenFlip({ image, index }, state => {
+      const { loadedImages, loadedCount } = state;
+      loadedImages.set(index, true);
+      return {
+        ...state,
+        loadedImages: new Map(loadedImages),
+        loadedCount: loadedCount + 1
+      };
+    });
+
+    const { loadedCount, images } = this.state;
+    if (loadedCount + 1 === images.length && runTimer) {
+      const  { flipInterval } = this.props;
+      this.timerIntervalID = setInterval(this.startTimer, flipInterval);
+    }
   }
 
   startTimer = () => {
@@ -67,8 +90,8 @@ export default class Root extends Component {
   };
 
   getRandomNonTweeningImageIndex(excludeIndex) {
-    const { imageLoader, indexState } = this.state;
-    const imagesLength = imageLoader.images.length;
+    const { images, indexState } = this.state;
+    const imagesLength = images.length;
     const { tweenFlags } = indexState;
     if (tweenFlags.size < imagesLength - 1) {
       const otherUntweenedIndices = [];
@@ -89,13 +112,14 @@ export default class Root extends Component {
    * @param {string} flipInfo.image The image to flip in.
   */
   tweenFlip = ({ index, image }) => {
+    const { SET_VALUE } = this.props;
     const { flipDelay, flipDuration } = this.props;
     const { indexState } = this.state;
     const { tweenFlags, frontImages, backImages, flipRotations, flipOpacities} = indexState;
     tweenFlags.set(index, true);
     frontImages.set(index, image);
-    flipRotations.set(index, 180);
-    flipOpacities.set(index, 0);
+    flipRotations.set(index, SET_VALUE(180));
+    flipOpacities.set(index, SET_VALUE(0));
     this.setState(state => ({...state, indexState: {
       ...state.indexState,
       tweenFlags: new Map(tweenFlags),
@@ -106,6 +130,7 @@ export default class Root extends Component {
     if (DEBUG) {
       console.log('start tween: ' + index)
     }
+
     this.tweenManager.startFlipTween({
       key: index,
       delay: flipDelay,
@@ -193,10 +218,10 @@ export default class Root extends Component {
   }
 
   render() {
-    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
+    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_VIEW, IMAGE_PROP, IMAGE_SRC } = this.props;
     const { width, height, baseUrl } = this.props;
-    const { imageLoader, indexState } = this.state;
-    const { tweenFlags, frontImages, backImages, flipRotations, flipOpacities } = indexState;
+    const { images, indexState } = this.state;
+    const { tweenFlags, loadedImages, frontImages, backImages, flipRotations, flipOpacities } = indexState;
     const appProps = {
       SCROLL_VIEW,
       INTERACTIVE_VIEW,
@@ -204,18 +229,19 @@ export default class Root extends Component {
       VIEW,
       VIEW_TRANSFORM,
       IMAGE,
+      IMAGE_VIEW,
       IMAGE_PROP,
       IMAGE_SRC,
       width,
       height,
       baseUrl,
-      images: imageLoader.images,
+      images,
       tweenFlags,
+      loadedImages,
       frontImages,
       backImages,
       flipRotations,
       flipOpacities,
-      loadedImages: imageLoader.loadedImages,
       onImageClick: this.onImageClick
     };
     return (
