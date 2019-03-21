@@ -18,9 +18,7 @@ export default class Root extends Component {
         frontImages: new Map(),     // Map of index to frontImage (only used when tweenFlag === true)
         backImages: new Map(),      // Map of index to backImage
         tweenFlags: new Map(),      // Map of index to tweenFlag
-        flipPercentages: new Map(), // Map of index to flipPercentage
-        flipRotations: new Map(),   // Map of index to flipRotation
-        flipOpacities: new Map()    // Map of index to flipOpacity
+        flipPercentages: new Map()  // Map of index to flipPercentage
       }
     };
   }
@@ -28,14 +26,13 @@ export default class Root extends Component {
   onManifestLoad = images => {
     // when images load, set the initial flipRotation and flipOpacity for each index
     this.setState(state => {
-      const { SET_VALUE } = this.props;
+      const { platformProps } = this.props;
+      const { setValue } = platformProps;
       const { indexState } = state;
-      const { loadedImages, flipPercentages, flipRotations, flipOpacities } = indexState;
+      const { loadedImages, flipPercentages } = indexState;
       const imagesLength = images.length;
       for (let i = 0; i < imagesLength; i++) {
-        flipPercentages.set(i, SET_VALUE(0));
-        flipRotations.set(i, SET_VALUE(0));
-        flipOpacities.set(i, SET_VALUE(1));
+        flipPercentages.set(i, setValue(0));
         loadedImages.set(i, false);
       }
       return {
@@ -45,8 +42,6 @@ export default class Root extends Component {
         indexState: {
           ...state.indexState,
           flipPercentages: new Map(flipPercentages),
-          flipRotations: new Map(flipRotations),
-          flipOpacities: new Map(flipOpacities),
           loadedImages: new Map(loadedImages)
         }
       };
@@ -115,61 +110,52 @@ export default class Root extends Component {
   */
   tweenFlip = ({ index, image }, stateUpdater = state => state) => {
     if (this.props.tweener) {
-      const { SET_VALUE } = this.props;
+      const { platformProps } = this.props;
+      const { setValue } = platformProps;
       const { flipDelay, flipDuration } = this.props;
       const { indexState } = this.state;
-      const { tweenFlags, frontImages, flipPercentages, flipRotations, flipOpacities } = indexState;
+      const { tweenFlags, frontImages, flipPercentages } = indexState;
       tweenFlags.set(index, true);
       frontImages.set(index, image);
-      flipPercentages.set(index, SET_VALUE(0));
-      flipRotations.set(index, SET_VALUE(180));
-      flipOpacities.set(index, SET_VALUE(0));
+      const flipPercentage = setValue(0);
+      flipPercentages.set(index, flipPercentage);
       this.setState(state => stateUpdater({
         ...state, indexState: {
           ...state.indexState,
           tweenFlags: new Map(tweenFlags),
           frontImages: new Map(frontImages),
-          flipPercentages: new Map(flipPercentages),
-          flipRotations: new Map(flipRotations),
-          flipOpacities: new Map(flipOpacities)
+          flipPercentages: new Map(flipPercentages)
         }
       }));
 
       this.props.tweener.start({
+        startValue: flipPercentage,
         delay: flipDelay,
         duration: flipDuration,
         update: percentage => {
           const { indexState } = this.state;
-          const { flipPercentages, flipRotations, flipOpacities } = indexState;
-          flipPercentages.set(index, SET_VALUE(percentage));
-          flipRotations.set(index, SET_VALUE(180 - percentage * 180));
-          flipOpacities.set(index, SET_VALUE(percentage < 0.5 ? 0 : 1));
+          const { flipPercentages } = indexState;
+          flipPercentages.set(index, setValue(percentage));
           this.setState(state => ({
             ...state, indexState: {
               ...state.indexState,
-              flipPercentages: new Map(flipPercentages),
-              flipRotations: new Map(flipRotations),
-              flipOpacities: new Map(flipOpacities)
+              flipPercentages: new Map(flipPercentages)
             }
           }));
         },
         complete: () => {
           const { indexState } = this.state;
-          const { tweenFlags, frontImages, backImages, flipPercentages, flipRotations, flipOpacities } = indexState;
+          const { tweenFlags, frontImages, backImages, flipPercentages } = indexState;
           tweenFlags.delete(index);
           frontImages.delete(index);
           backImages.set(index, image);
-          flipPercentages.set(index, SET_VALUE(0));
-          flipRotations.set(index, SET_VALUE(0));
-          flipOpacities.set(index, SET_VALUE(1));
+          flipPercentages.set(index, setValue(0));
           this.setState(state => ({
             ...state, indexState: {
               ...state.indexState,
               tweenFlags: new Map(tweenFlags),
               frontImages: new Map(frontImages),
-              flipPercentages: new Map(flipPercentages),
-              flipRotations: new Map(flipRotations),
-              flipOpacities: new Map(flipOpacities)
+              flipPercentages: new Map(flipPercentages)
             }
           }));
         }
@@ -205,20 +191,12 @@ export default class Root extends Component {
   }
 
   render() {
-    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_VIEW, IMAGE_PROP, IMAGE_SRC } = this.props;
+    const { platformProps } = this.props;
     const { width, height, baseUrl } = this.props;
     const { images, indexState } = this.state;
-    const { tweenFlags, loadedImages, frontImages, backImages, flipRotations, flipOpacities } = indexState;
+    const { tweenFlags, loadedImages, frontImages, backImages, flipPercentages } = indexState;
     const appProps = {
-      SCROLL_VIEW,
-      INTERACTIVE_VIEW,
-      INTERACTIVE_PROP,
-      VIEW,
-      VIEW_TRANSFORM,
-      IMAGE,
-      IMAGE_VIEW,
-      IMAGE_PROP,
-      IMAGE_SRC,
+      platformProps,
       width,
       height,
       baseUrl,
@@ -227,8 +205,7 @@ export default class Root extends Component {
       loadedImages,
       frontImages,
       backImages,
-      flipRotations,
-      flipOpacities,
+      flipPercentages,
       onImageClick: this.onImageClick
     };
     return (

@@ -76,17 +76,22 @@ const rootProps = {
   flipDelay: 5,
   flipDuration: 1000,
   flipInterval: 5000,
-  runTimer: true,
-  SET_VALUE: v => v,
-  SCROLL_VIEW: props => <div {...props} />,
-  INTERACTIVE_VIEW: props => <div {...props}/>,
-  INTERACTIVE_PROP: 'onClick',
-  VIEW: props => <div {...props} />,
-  VIEW_TRANSFORM: (flipRotation) => 'rotateY(' + flipRotation + 'deg)',
-  IMAGE: props => <img {...props} />,
-  IMAGE_VIEW: props => <div {...props} />,
-  IMAGE_PROP: 'src',
-  IMAGE_SRC: image => image
+  runTimer: false,
+  platformProps: {
+    setValue: v => v,
+    FlipperScrollView: props => <div {...props} />,
+    FlipperInteractiveView: props => <div {...props} />,
+    interactiveProp: 'onClick',
+    FlipperView: props => <div {...props} />,
+    FlipperImage: props => <img {...props} />,
+    FlipperImageView: props => <div {...props} />,
+    imageProp: 'src',
+    getImageSrc: image => image,
+    frontOpacityForPercentage: percentage => percentage < 0.5 ? 0 : 1,
+    backOpacityForPercentage: percentage => percentage < 0.5 ? 1 : 0,
+    frontRotationForPercentage: percentage => 'rotateY(' + (180 - percentage * 180) + 'deg)',
+    backRotationForPercentage: percentage => 'rotateY(' + (percentage * 180) + 'deg)'
+  }
 };
 
 render((

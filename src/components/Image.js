@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 
 export default class Image extends Component {
   render() {
-    const { VIEW, VIEW_TRANSFORM, IMAGE_VIEW, IMAGE, IMAGE_PROP, IMAGE_SRC } = this.props;
-    const { width, height, image, className, flipRotation, flipOpacity } = this.props;
+    const { platformProps } = this.props;
+    const { FlipperImage, FlipperImageView, FlipperView, imageProp, getImageSrc } = platformProps;
+    const { width, height, image, className, flipPercentage, flipRotation, flipOpacity } = this.props;
     const imageContainerStyle = {
-      transform: VIEW_TRANSFORM(flipRotation),
+      transform: flipRotation(flipPercentage),
       perspective: 1000, // Fix for Android - https://facebook.github.io/react-native/docs/animations#bear-in-mind
-      opacity: flipOpacity,
-      zIndex: flipOpacity < 0.5 ? 2 : 1,
+      opacity: flipOpacity(flipPercentage),
       position: 'absolute',
       left: 0,
       top: 0
@@ -23,13 +23,13 @@ export default class Image extends Component {
       height: height
     };
     return (
-      <IMAGE_VIEW className={'image ' + className} style={imageContainerStyle}>
+      <FlipperImageView className={'image ' + className} style={imageContainerStyle}>
         {image ? (
-          <IMAGE {...{[IMAGE_PROP]: IMAGE_SRC(image)}} style={imageStyle}/>
+          <FlipperImage {...{[imageProp]: getImageSrc(image)}} style={imageStyle}/>
         ) : (
-            <VIEW className="image-empty" style={imageEmptyStyle}/>
+          <FlipperView className="image-empty" style={imageEmptyStyle}/>
         )}
-      </IMAGE_VIEW>
+      </FlipperImageView>
     );
   }
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, Dimensions, TouchableOpacity, View, Image, ScrollView } from 'react-native';
+import { AppRegistry, Dimensions, TouchableOpacity, View, Image, ScrollView, Animated } from 'react-native';
 import Orientation from 'react-native-orientation';
 import imageCacheHoc from 'react-native-image-cache-hoc';
 const CachedImage = imageCacheHoc(Image, { validProtocols: ['http', 'https'] });
@@ -22,6 +22,8 @@ const loadNativeImage = (url) => Image.prefetch(url);
 
 const BLANK_URL = ''; // 'https://blank.jpg'
 
+const USE_RAF = false;
+
 const tweener = buildTweener(requestAnimationFrame, () => Date.now, false);
 
 const flipTweener = {
@@ -37,7 +39,39 @@ const flipTweener = {
     tween.start();
   },
   cancel: () => {
-    tweener.cancel();
+    // tweener.cancel(); // this cancels all tweens which is bad
+  }
+}
+
+// TODO - the start function should just return the cancel function, but that requires storing state etc
+
+const flipAnimatedTweener = {
+  start: ({
+    delay,
+    duration,
+    complete,
+    startValue
+  }) => {
+
+    const startAnimated = () => {
+      Animated.timing(startValue, {
+        toValue: 1,
+        duration: duration,
+        useNativeDriver: true,
+      }).start(() => {
+        complete();
+      });
+    };
+
+    if (delay > 0) {
+      setTimeout(startAnimated)
+    }
+    else {
+      startAnimated();
+    }
+  },
+  cancel: () => {
+    
   }
 }
 
@@ -73,8 +107,25 @@ class Index extends Component {
 
   render() {
     const { width, height } = this.state;
+
+    const basePlatformProps = {
+      setValue: v => v,
+      FlipperScrollView: props => <View style={{ width: width, height: height }}><ScrollView {...{ ...props, contentContainerStyle: { width: width, height: props.style.height } }} /></View>,
+      FlipperInteractiveView: props => <TouchableOpacity {...props} />,
+      interactiveProp: 'onPress',
+      FlipperView: props => <View {...props} />,
+      FlipperImage: props => <CachedImage {...props} />,
+      FlipperImageView: props => <View {...props} />,
+      imageProp: 'source',
+      getImageSrc: image => ({ uri: image ? image : BLANK_URL }),
+      frontOpacityForPercentage: percentage => percentage < 0.5 ? 0 : 1,
+      backOpacityForPercentage: percentage => percentage < 0.5 ? 1 : 0,
+      frontRotationForPercentage: percentage => [{ rotateY: (180 - percentage * 180) + 'deg' }],
+      backRotationForPercentage: percentage => [{ rotateY: (percentage * 180) + 'deg' }]
+    };
+
     const rootProps = {
-      tweener: flipTweener,
+      tweener: USE_RAF ? flipTweener : flipAnimatedTweener,
       imageLoader: imageLoader,
       width,
       height,
@@ -82,17 +133,16 @@ class Index extends Component {
       flipDelay: 5,
       flipDuration: 1000,
       flipInterval: 5000,
-      runTimer: true,
-      SET_VALUE: v => v,
-      SCROLL_VIEW: props => <View style={{width: width, height: height}}><ScrollView {...{ ...props, contentContainerStyle: { width: width, height: props.style.height } }} /></View>,
-      INTERACTIVE_VIEW: props => <TouchableOpacity {...props} />,
-      INTERACTIVE_PROP: 'onPress',
-      VIEW: props => <View {...props} />,
-      VIEW_TRANSFORM: (flipRotation) => [{ rotateY: flipRotation + 'deg' }],
-      IMAGE: props => <CachedImage {...props} />,
-      IMAGE_VIEW: props => <View {...props} />,
-      IMAGE_PROP: 'source',
-      IMAGE_SRC: image => ({ uri: image ? image : BLANK_URL })
+      runTimer: false,
+      platformProps: USE_RAF ? basePlatformProps : {
+          ...basePlatformProps,
+        setValue: v => new Animated.Value(v),
+        FlipperImageView: props => <Animated.View {...props} />,
+        frontOpacityForPercentage: percentage => percentage.interpolate({ inputRange: [0.49, 0.5], outputRange: [0, 1] }),
+        backOpacityForPercentage: percentage => percentage.interpolate({ inputRange: [0.49, 0.5], outputRange: [1, 0] }),
+        frontRotationForPercentage: percentage => [{ rotateY: percentage.interpolate({ inputRange: [0, 1], outputRange: ['180deg', '0deg'] }) }],
+        backRotationForPercentage: percentage => [{ rotateY: percentage.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] }) }]
+      }
     };
 
     return (

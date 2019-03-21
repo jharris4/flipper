@@ -15,8 +15,9 @@ function getHeightForWidth(width) {
 
 export default class App extends Component {
   render() {
-    const { SCROLL_VIEW, INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_VIEW, IMAGE_PROP, IMAGE_SRC } = this.props;
-    const { width, height, images, tweenFlags, frontImages, backImages, flipRotations, flipOpacities,
+    const { platformProps } = this.props;
+    const { FlipperScrollView } = platformProps;
+    const { width, height, images, tweenFlags, frontImages, backImages, flipPercentages,
       baseUrl, loadedImages, onImageClick } = this.props;
     const columns = getColumnsForWidth(width);
     const rows = Math.ceil(images.length / columns);
@@ -32,32 +33,20 @@ export default class App extends Component {
       minHeight: height
     };
 
-    const doubleImageProps = {
-      INTERACTIVE_VIEW,
-      INTERACTIVE_PROP,
-      VIEW,
-      VIEW_TRANSFORM,
-      IMAGE,
-      IMAGE_VIEW,
-      IMAGE_PROP,
-      IMAGE_SRC
-    };
-
     return (
-      <SCROLL_VIEW className="app" style={appStyle}>
+      <FlipperScrollView className="app" style={appStyle}>
         {images ? images.map((image, i) => {
           const frontImage = frontImages.get(i) ? baseUrl + frontImages.get(i) : null;
           const backImage = backImages.get(i) ? baseUrl + backImages.get(i) : null;
           return (
             <DoubleImage
               key={i}
-              {...doubleImageProps}
+              platformProps={platformProps}
               index={i}
               tweenFlag={tweenFlags.get(i)}
               frontImage={frontImage}
               backImage={backImage}
-              flipRotation={flipRotations.get(i)}
-              flipOpacity={flipOpacities.get(i)}
+              flipPercentage={flipPercentages.get(i)}
               loaded={loadedImages.get(i)}
               onImageClick={onImageClick}
               width={imageWidth}
@@ -68,7 +57,7 @@ export default class App extends Component {
               last={i % columns === columns -1}/>
           )
         }) : null}
-      </SCROLL_VIEW>
+      </FlipperScrollView>
     );
   }
 }

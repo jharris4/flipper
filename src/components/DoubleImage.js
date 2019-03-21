@@ -11,14 +11,21 @@ export default class DoubleImage extends PureComponent {
   }
 
   render() {
-    const { INTERACTIVE_VIEW, INTERACTIVE_PROP, VIEW, VIEW_TRANSFORM, IMAGE, IMAGE_VIEW, IMAGE_PROP, IMAGE_SRC } = this.props;
-    const { index, tweenFlag, frontImage, backImage, flipRotation, flipOpacity, width, height, row, col, first, last } = this.props;
+    const { platformProps } = this.props;
+    const {
+      FlipperInteractiveView,
+      FlipperView,
+      interactiveProp,
+      frontRotationForPercentage,
+      backRotationForPercentage,
+      frontOpacityForPercentage,
+      backOpacityForPercentage,
+      frontZIndexForPercentage,
+      backZIndexForPercentage
+    } = platformProps;
+    const { tweenFlag, frontImage, backImage, flipPercentage, width, height, row, col, first, last } = this.props;
     const firstLastClass = first ? 'first' : last ? 'last' : null;
     const className = 'double-image' + (firstLastClass ? ' ' + firstLastClass : '');
-    const backRotation = tweenFlag ? 180 - flipRotation : flipRotation;
-    const frontRotation = flipRotation;
-    const backOpacity = tweenFlag ? 1 - flipOpacity : flipOpacity;
-    const frontOpacity = tweenFlag ? flipOpacity : 0;
     const frontImageKey = tweenFlag ? frontImage : 'unused';
 
     const innerWidth = width - 2 * PADDING;
@@ -40,26 +47,22 @@ export default class DoubleImage extends PureComponent {
     };
 
     const imageProps = {
-      VIEW,
-      VIEW_TRANSFORM,
-      IMAGE,
-      IMAGE_VIEW,
-      IMAGE_PROP,
-      IMAGE_SRC,
+      flipPercentage,
+      platformProps,
       width: innerWidth,
       height: innerHeight
     };
 
     return (
-      <INTERACTIVE_VIEW
+      <FlipperInteractiveView
         className={className}
-        {...{[INTERACTIVE_PROP]: this.onClick}}
+        {...{ [interactiveProp]: this.onClick}}
         style={doubleContainerStyle}>
-        <VIEW className="double-image-inner" style={doubleInnerStyle}>
-          <Image key={backImage} {...imageProps} className="image-back" image={backImage} flipRotation={backRotation} flipOpacity={backOpacity} />
-          <Image key={frontImageKey} {...imageProps} className="image-front" image={frontImage} flipRotation={frontRotation} flipOpacity={frontOpacity} />
-        </VIEW>
-      </INTERACTIVE_VIEW>
+        <FlipperView className="double-image-inner" style={doubleInnerStyle}>
+          <Image key={backImage} {...imageProps} className="image-back" image={backImage} flipRotation={backRotationForPercentage} flipOpacity={backOpacityForPercentage} flipZIndex={backZIndexForPercentage}/>
+          <Image key={frontImageKey} {...imageProps} className="image-front" image={frontImage} flipRotation={frontRotationForPercentage} flipOpacity={frontOpacityForPercentage} flipZIndex={frontZIndexForPercentage}/>
+        </FlipperView>
+      </FlipperInteractiveView>
     );
   }
 }
