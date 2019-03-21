@@ -78,12 +78,16 @@ class AnimatedTweener {
     else {
       startTiming();
     }
-    this._valueMap.set(startValue, true);
   }
 
   cancel() {
     this._valueMap.forEach(value => {
-      Animated.timing(value).stop();
+      try {
+        Animated.timing(value).stop();
+      }
+      catch (e) {
+        console.log('error stopping Animated.timing, value was: ', value, e);
+      }
     });
     this._valueDelayMap.forEach(timeoutId => {
       clearTimeout(timeoutId);
