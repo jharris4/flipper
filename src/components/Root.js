@@ -1,34 +1,28 @@
 import React, { Component } from 'react';
 
 import App from './App';
-import ImageLoader from '../imageLoader/imageLoader';
-import { getTweenManager } from '../tween/tween';
-
-const DEBUG = false;
 
 export default class Root extends Component {
   constructor(props) {
     super(props);
-    const { RAF, GET_NOW, USE_FIRST_RAF } = props;
-    const { baseUrl, manifestLocation, loadImage } = props;
-    const imageLoader = new ImageLoader(baseUrl, loadImage);
+    const { imageLoader } = props;
     imageLoader.onManifestLoad(this.onManifestLoad);
     imageLoader.onImageLoad(this.onImageLoad);
     // load the list of images
-    imageLoader.loadManifest(manifestLocation);
+    imageLoader.loadManifest();
     this.state = {
-      images: [],                 // Array of images
+      images: [],                   // Array of images
+      loadedImageCount: 0,          // Number of loaded images
       indexState: {
-        loadedCount: 0,           // Number of loaded images
-        loadedImages: new Map(),  // Map of index to imageLoadedFlag
-        tweenFlags: new Map(),    // Map of index to tweenFlag
-        frontImages: new Map(),   // Map of index to frontImage (only used when tweenFlag === true)
-        backImages: new Map(),    // Map of index to backImage
-        flipRotations: new Map(), // Map of index to flipRotation
-        flipOpacities: new Map()  // Map of index to flipOpacity
+        loadedImages: new Map(),    // Map of index to imageLoadedFlag
+        frontImages: new Map(),     // Map of index to frontImage (only used when tweenFlag === true)
+        backImages: new Map(),      // Map of index to backImage
+        tweenFlags: new Map(),      // Map of index to tweenFlag
+        flipPercentages: new Map(), // Map of index to flipPercentage
+        flipRotations: new Map(),   // Map of index to flipRotation
+        flipOpacities: new Map()    // Map of index to flipOpacity
       }
     };
-    this.tweenManager = getTweenManager(RAF, GET_NOW, USE_FIRST_RAF, ['Flip']);
   }
 
   onManifestLoad = images => {
@@ -36,9 +30,10 @@ export default class Root extends Component {
     this.setState(state => {
       const { SET_VALUE } = this.props;
       const { indexState } = state;
-      const { flipRotations, flipOpacities, loadedImages } = indexState;
+      const { loadedImages, flipPercentages, flipRotations, flipOpacities } = indexState;
       const imagesLength = images.length;
       for (let i = 0; i < imagesLength; i++) {
+        flipPercentages.set(i, SET_VALUE(0));
         flipRotations.set(i, SET_VALUE(0));
         flipOpacities.set(i, SET_VALUE(1));
         loadedImages.set(i, false);
@@ -46,31 +41,38 @@ export default class Root extends Component {
       return {
         ...state,
         images,
+        loadedImageCount: 0,
         indexState: {
           ...state.indexState,
+          flipPercentages: new Map(flipPercentages),
           flipRotations: new Map(flipRotations),
           flipOpacities: new Map(flipOpacities),
-          loadedImages: new Map(loadedImages),
-          loadedCount: 0
+          loadedImages: new Map(loadedImages)
         }
       };
     });
   }
 
   onImageLoad = (image, index) => {
+    const { runTimer } = this.props;
+    const { loadedImageCount, images } = this.state;
+
     // as each image loads, start a flip animation on it
     this.tweenFlip({ image, index }, state => {
-      const { loadedImages, loadedCount } = state;
+      const { loadedImageCount, indexState } = state;
+      const { loadedImages } = indexState;
       loadedImages.set(index, true);
       return {
         ...state,
-        loadedImages: new Map(loadedImages),
-        loadedCount: loadedCount + 1
+        loadedImageCount: loadedImageCount + 1,
+        indexState: {
+          ...state.indexState,
+          loadedImages: new Map(loadedImages)
+        }
       };
     });
 
-    const { loadedCount, images } = this.state;
-    if (loadedCount + 1 === images.length && runTimer) {
+    if (loadedImageCount + 1 === images.length && runTimer) {
       const  { flipInterval } = this.props;
       this.timerIntervalID = setInterval(this.startTimer, flipInterval);
     }
@@ -111,87 +113,68 @@ export default class Root extends Component {
    * @param {number} flipInfo.index The index to flip.
    * @param {string} flipInfo.image The image to flip in.
   */
-  tweenFlip = ({ index, image }) => {
-    const { SET_VALUE } = this.props;
-    const { flipDelay, flipDuration } = this.props;
-    const { indexState } = this.state;
-    const { tweenFlags, frontImages, backImages, flipRotations, flipOpacities} = indexState;
-    tweenFlags.set(index, true);
-    frontImages.set(index, image);
-    flipRotations.set(index, SET_VALUE(180));
-    flipOpacities.set(index, SET_VALUE(0));
-    this.setState(state => ({...state, indexState: {
-      ...state.indexState,
-      tweenFlags: new Map(tweenFlags),
-      frontImages: new Map(frontImages),
-      flipRotations: new Map(flipRotations),
-      flipOpacities: new Map(flipOpacities)
-    }}));
-    if (DEBUG) {
-      console.log('start tween: ' + index)
-    }
-
-    this.tweenManager.startFlipTween({
-      key: index,
-      delay: flipDelay,
-      duration: flipDuration,
-      animationData: {
-        start: {
-          rotation: 180,
-          opacity: 0,
-        },
-        final: {
-          rotation: 0,
-          opacity: 1,
-        }
-      },
-      getDataForPercent: (animationData, percentage) => {
-        const { start, final } = animationData;
-        return {
-          rotation: start.rotation + (final.rotation - start.rotation) * percentage,
-          // Fix for backface-visibility problems on Android and Firefox - https://github.com/facebook/react-native/issues/1973#issuecomment-262059217
-          opacity: percentage < 0.5 ? start.opacity : final.opacity
-        }
-      },
-      updateCallback: ({ rotation, opacity }) => {
-        const { indexState } = this.state;
-        const { flipRotations, flipOpacities } = indexState;
-        if (DEBUG) {
-          console.log('update ' + index + ' ' + image + ' ' + rotation + ' ' + opacity);
-        }
-        flipRotations.set(index, rotation);
-        flipOpacities.set(index, opacity);
-        this.setState(state => ({...state, indexState: {
-          ...state.indexState,
-          flipRotations: new Map(flipRotations),
-          flipOpacities: new Map(flipOpacities)
-        }}));
-      },
-      startCallback: () => {
-        if (DEBUG) {
-          console.log('start ' + index + ' ' + image);
-        }
-      },
-      completeCallback: () => {
-        if (DEBUG) {
-          console.log('complete ' + index + ' ' + image);
-        }
-        const { indexState } = this.state;
-        const { tweenFlags, frontImages, backImages, flipRotations, flipOpacities } = indexState;
-        tweenFlags.delete(index);
-        frontImages.delete(index);
-        backImages.set(index, image);
-        flipRotations.set(index, 0);
-        flipOpacities.set(index, 1);
-        this.setState(state => ({...state, indexState: {
+  tweenFlip = ({ index, image }, stateUpdater = state => state) => {
+    if (this.props.tweener) {
+      const { SET_VALUE } = this.props;
+      const { flipDelay, flipDuration } = this.props;
+      const { indexState } = this.state;
+      const { tweenFlags, frontImages, flipPercentages, flipRotations, flipOpacities } = indexState;
+      tweenFlags.set(index, true);
+      frontImages.set(index, image);
+      flipPercentages.set(index, SET_VALUE(0));
+      flipRotations.set(index, SET_VALUE(180));
+      flipOpacities.set(index, SET_VALUE(0));
+      this.setState(state => stateUpdater({
+        ...state, indexState: {
           ...state.indexState,
           tweenFlags: new Map(tweenFlags),
           frontImages: new Map(frontImages),
+          flipPercentages: new Map(flipPercentages),
           flipRotations: new Map(flipRotations),
           flipOpacities: new Map(flipOpacities)
-        }}));
-      }
-    });
+        }
+      }));
+
+      this.props.tweener.start({
+        delay: flipDelay,
+        duration: flipDuration,
+        update: percentage => {
+          const { indexState } = this.state;
+          const { flipPercentages, flipRotations, flipOpacities } = indexState;
+          flipPercentages.set(index, SET_VALUE(percentage));
+          flipRotations.set(index, SET_VALUE(180 - percentage * 180));
+          flipOpacities.set(index, SET_VALUE(percentage < 0.5 ? 0 : 1));
+          this.setState(state => ({
+            ...state, indexState: {
+              ...state.indexState,
+              flipPercentages: new Map(flipPercentages),
+              flipRotations: new Map(flipRotations),
+              flipOpacities: new Map(flipOpacities)
+            }
+          }));
+        },
+        complete: () => {
+          const { indexState } = this.state;
+          const { tweenFlags, frontImages, backImages, flipPercentages, flipRotations, flipOpacities } = indexState;
+          tweenFlags.delete(index);
+          frontImages.delete(index);
+          backImages.set(index, image);
+          flipPercentages.set(index, SET_VALUE(0));
+          flipRotations.set(index, SET_VALUE(0));
+          flipOpacities.set(index, SET_VALUE(1));
+          this.setState(state => ({
+            ...state, indexState: {
+              ...state.indexState,
+              tweenFlags: new Map(tweenFlags),
+              frontImages: new Map(frontImages),
+              flipPercentages: new Map(flipPercentages),
+              flipRotations: new Map(flipRotations),
+              flipOpacities: new Map(flipOpacities)
+            }
+          }));
+        }
+      });
+    }
   }
 
   onImageClick = (index) => {
@@ -201,8 +184,6 @@ export default class Root extends Component {
       const swapIndex = this.getRandomNonTweeningImageIndex(index);
 
       if (swapIndex !== void 0) {
-        // DEBUG = true;
-
         this.tweenFlip({ index: index, image: backImages.get(swapIndex) });
         this.tweenFlip({ index: swapIndex, image: backImages.get(index) });
       }
@@ -210,10 +191,16 @@ export default class Root extends Component {
   }
 
   componentWillUnmount() {
-    this.tweenManager.cancelFlipTween();
+    if (this.props.tweener) {
+      this.props.tweener.cancel();
+    }
     if (this.timerIntervalID !== null) {
       clearInterval(this.timerIntervalID);
       this.timerIntervalID = null;
+    }
+    if (this.props.imageLoader) {
+      this.props.imageLoader.onManifestLoad(null);
+      this.props.imageLoader.onImageLoad(null);
     }
   }
 

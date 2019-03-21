@@ -1,51 +1,16 @@
-function getNow() {
-  let now;
-  if (typeof (window) !== 'undefined' && window.performance !== void 0 && window.performance.now !== void 0) {
-    now = window.performance.now.bind(window.performance);
-  }
-  else if (Date.now !== void 0) {
-    now = Date.now;
-  }
-  else {
-    now = function () {
-      return new Date().getTime();
-    };
-  }
-  return now;
-}
-
-function buildTweener(raf) {
-  const Tweener = Tweener || createTweener(raf);
-
-  if (Tweener._requestRaf === void 0) {
-    Tweener._animationId = null;
-    Tweener._rafCallback = function (ts) {
-      if (!ts) {
-        ts = +(new Date());
-      }
-      if (Tweener.update(ts)) {
-        Tweener._animationId = raf(Tweener._rafCallback);
-      }
-      else {
-        Tweener._animationId = null;
-      }
-    };
-    Tweener._requestRaf = function () {
-      if (Tweener._animationId === null) {
-        Tweener._animationId = raf(Tweener._rafCallback);
-      }
-    };
-  }
+export function buildTweener(raf, getNow, useFirstRaf) {
+  const Tweener = Tweener || createTweener(raf, getNow, useFirstRaf);
 
   return Tweener;
 }
 
-function createTweener(raf) {
+function createTweener(raf, getNow, useFirstRaf) {
   const now = getNow();
 
   let _tweens = {};
   let _pendingTweens = {};
   let _nextTweenId = 0;
+  let _animationId = null;
 
   let add = function (tween) {
     _tweens[tween.id] = tween;
@@ -57,11 +22,17 @@ function createTweener(raf) {
     delete _pendingTweens[tween.id];
   }
 
+  let cancel = function () {
+    _tweens = {};
+    _pendingTweens = {};
+    _nextTweenId = 0;
+  }
+
   let update = function (time) {
     let tweenIds = Object.keys(_tweens);
 
     if (tweenIds.length === 0) {
-      return false;
+      return false; // raf callback loop will stop
     }
 
     time = time !== void 0 ? time : now();
@@ -77,8 +48,27 @@ function createTweener(raf) {
 
       tweenIds = Object.keys(_pendingTweens);
     }
-    return true;
+    return true; // raf callback loop will continue
   }
+
+  let _rafCallback = function (ts) {
+    if (!ts) {
+      // console.error('no ts on raf: ' + JSON.stringify(ts));
+      ts = +(new Date());
+    }
+    if (update(ts)) {
+      _animationId = raf(_rafCallback);
+    }
+    else {
+      _animationId = null;
+    }
+  };
+
+  let _requestRaf = function () {
+    if (_animationId === null) {
+      _animationId = raf(_rafCallback);
+    }
+  };
 
   let create = function (duration, delay = 0) {
     let id = _nextTweenId++;
@@ -97,17 +87,18 @@ function createTweener(raf) {
       isPlaying = true;
       onStartCallbackFired = false;
 
-      startTime = delay + (time !== void 0 ? time : now());
-      return tween;
+      startTime = delay + time;
+      _requestRaf();
     }
 
     let start = function() {
-      if (now === Date.now) {
-        // Fix for older versions of Safari
+      if (useFirstRaf) {
+        // Used to fix older versions of Safari
+        // TODO - the raf call id should be cancelable or tracked
         raf((time) => { startWithTime(time); });
       }
       else {
-        startWithTime();
+        startWithTime(now());
       }
     }
 
@@ -211,80 +202,7 @@ function createTweener(raf) {
     add,
     remove,
     update,
-    create
+    create,
+    cancel
   };
-}
-
-export function getTweenManager(raf, tweenTypes) {
-  const Tweener = buildTweener(raf);
-
-  let tweensByType = {};
-
-  let tweenManager = {};
-  for (let type of tweenTypes) {
-    let tweenType = type;
-    let startFunctionName = 'start' + tweenType + 'Tween';
-    let cancelFunctionName = 'cancel' + tweenType + 'Tween';
-    tweenManager[startFunctionName] = ({
-      duration,
-      animationData,
-      getDataForPercent,
-      updateCallback,
-      completeCallback = () => { },
-      startCallback = () => { }
-    }) => {
-      tweenManager[cancelFunctionName]();
-      let tween = tweensByType[tweenType] = buildAnimationTween(
-        Tweener,
-        {
-          duration,
-          animationData,
-          updateCallback,
-          getDataForPercent,
-          completeCallback: () => { tweensByType[tweenType] = null; completeCallback(); },
-          startCallback
-        }
-      );
-      // TODO, defer start until after next raf callback?!
-      tween.start();
-      Tweener._requestRaf();
-    };
-    tweenManager[cancelFunctionName] = () => {
-      let tween = tweensByType[tweenType];
-      if (tween) {
-        tween.stop();
-        tweensByType[tweenType] = null;
-      }
-    };
-  };
-
-  return tweenManager;
-}
-
-function buildAnimationTween(
-  Tweener,
-  {
-    duration,
-    animationData,
-    updateCallback,
-    getDataForPercent,
-    completeCallback = () => { },
-    startCallback = () => { }
-  }) {
-  // delay the start of the flipper tween by a few milliseconds to allow it to be canceled if another tween is built
-  // immediately after, like if a click to flip is done in rapid succession
-  let delay = 5;
-  let animatedTween = Tweener.create(duration, delay);
-  animatedTween.onStart(() => {
-    startCallback();
-    updateCallback(animationData.start);
-  });
-  animatedTween.onUpdate(percentage => {
-    updateCallback(getDataForPercent(animationData, percentage));
-  });
-  animatedTween.onComplete(() => {
-    updateCallback(animationData.final);
-    completeCallback();
-  });
-  return animatedTween;
 }

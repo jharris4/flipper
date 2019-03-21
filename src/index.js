@@ -4,6 +4,9 @@ import raf from 'raf';
 
 import sizer from 'react-sizer';
 
+import { buildTweener } from './tween';
+import { ImageLoader } from './imageLoader';
+
 import Root from './components/Root';
 const SizerRoot = sizer()(Root);
 
@@ -45,18 +48,36 @@ function getNow() {
   return now;
 }
 
+const tweener = buildTweener(raf, getNow, getNow() === Date.now);
+
+const flipTweener = {
+  start: ({
+    delay,
+    duration,
+    update,
+    complete
+  }) => {
+    const tween = tweener.create(duration, delay);
+    tween.onUpdate(update);
+    tween.onComplete(complete);
+    tween.start();
+  },
+  cancel: () => {
+    tweener.cancel();
+  }
+}
+
+const imageLoader = new ImageLoader(baseUrl, manifestLocation, loadWebImage);
+
 const rootProps = {
-  baseUrl,
-  manifestLocation,
-  loadImage: loadWebImage,
+  tweener: flipTweener,
+  imageLoader: imageLoader,
+  baseUrl: baseUrl,
   flipDelay: 5,
   flipDuration: 1000,
   flipInterval: 5000,
   runTimer: true,
   SET_VALUE: v => v,
-  RAF: raf,
-  GET_NOW: getNow,
-  USE_FIRST_RAF: getNow() === Date.now,
   SCROLL_VIEW: props => <div {...props} />,
   INTERACTIVE_VIEW: props => <div {...props}/>,
   INTERACTIVE_PROP: 'onClick',

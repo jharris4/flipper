@@ -1,5 +1,6 @@
-export default function ImageLoader(baseUrl, loadImagePromise) {
+export function ImageLoader(baseUrl, manifestLocation, loadImagePromise) {
   this._baseUrl = baseUrl;
+  this._manifestLocation = manifestLocation;
   this._loadImagePromise = loadImagePromise;
   this._images = [];
   this._imagesLoadedByLocation = new Map();
@@ -9,6 +10,14 @@ export default function ImageLoader(baseUrl, loadImagePromise) {
 ImageLoader.prototype = {
   get baseUrl() {
     return this._baseUrl;
+  },
+
+  get manifestLocation() {
+    return this._manifestLocation;
+  },
+
+  get manifestUrl() {
+    return this._baseUrl + this._manifestLocation;
   },
 
   get images() {
@@ -59,11 +68,11 @@ ImageLoader.prototype = {
 
   loadError(error, manifestLocation) {
     this._error = error;
-    console.log('imageLoader loadError: ' + error.message + ' ' + this._baseUrl + manifestLocation);
+    console.log('imageLoader loadError: ' + error.message + ' ' + this.manifestUrl);
   },
 
-  loadManifest(manifestLocation) {
-    fetch(this._baseUrl + manifestLocation)
+  loadManifest() {
+    fetch(this.manifestUrl)
       .then(response => response.json())
       .then(data => {
         if (this._onManifestLoad) {
@@ -72,7 +81,7 @@ ImageLoader.prototype = {
         this.loadImages(data.images);
       })
       .catch(error => {
-        this.loadError(error, manifestLocation);
+        this.loadError(error);
       });
   }
 };
