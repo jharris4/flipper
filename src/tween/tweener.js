@@ -4,12 +4,15 @@ export function buildTweener(raf, getNow, useFirstRaf) {
   return Tweener;
 }
 
+const MIN_SAFE_ID = Number.MIN_SAFE_INTEGER;
+const MAX_SAFE_ID = Number.MAX_SAFE_INTEGER;
+
 function createTweener(raf, getNow, useFirstRaf) {
   const now = getNow();
 
   let _tweens = {};
   let _pendingTweens = {};
-  let _nextTweenId = 0;
+  let _nextTweenId = MIN_SAFE_ID;
   let _animationId = null;
 
   let add = function (tween) {
@@ -25,7 +28,7 @@ function createTweener(raf, getNow, useFirstRaf) {
   let cancel = function () {
     _tweens = {};
     _pendingTweens = {};
-    _nextTweenId = 0;
+    _nextTweenId = MIN_SAFE_ID;
   }
 
   let update = function (time) {
@@ -70,8 +73,19 @@ function createTweener(raf, getNow, useFirstRaf) {
     }
   };
 
+  let nextTweenId = function () {
+    const tweenId = _nextTweenId;
+    if (_nextTweenId < MAX_SAFE_ID) {
+      _nextTweenId++;
+    }
+    else {
+      _nextTweenId = MIN_SAFE_ID;
+    }
+    return tweenId;
+  }
+
   let create = function (duration, delay = 0) {
-    let id = _nextTweenId++;
+    let id = nextTweenId();
     let startTime = null;
     let isPlaying = false;
     let onStartCallbackFired = false;
