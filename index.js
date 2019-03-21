@@ -22,7 +22,7 @@ const loadNativeImage = (url) => Image.prefetch(url);
 
 const BLANK_URL = ''; // 'https://blank.jpg'
 
-const USE_RAF = false;
+const DEFAULT_USE_RAF = false;
 
 const tweener = buildTweener(requestAnimationFrame, () => Date.now, false);
 
@@ -39,41 +39,58 @@ const flipTweener = {
     tween.start();
   },
   cancel: () => {
-    // tweener.cancel(); // this cancels all tweens which is bad
+    tweener.cancel(); // this cancels all tweens
   }
 }
 
-// TODO - the start function should just return the cancel function, but that requires storing state etc
+class AnimatedTweener {
+  constructor() {
+    this._valueMap = new Map();
+    this._valueDelayMap = new Map();
+  }
 
-const flipAnimatedTweener = {
-  start: ({
-    delay,
-    duration,
-    complete,
-    startValue
-  }) => {
-
-    const startAnimated = () => {
+  start({ delay, duration, complete, startValue}) {
+    if (this._valueMap.get(startValue)) {
+      Animated.timing(startValue).stop();
+    }
+    if (this._valueDelayMap.get(startValue)) {
+      clearTimeout(this._valueDelayMap.get(startValue));
+    }
+    const startTiming = () => {
+      this._valueMap.set(startValue, true);
       Animated.timing(startValue, {
         toValue: 1,
         duration: duration,
         useNativeDriver: true,
       }).start(() => {
+        this._valueMap.delete(startValue);
         complete();
       });
-    };
-
+    }
     if (delay > 0) {
-      setTimeout(startAnimated)
+      const timeoutId = setTimeout(() => {
+        this._valueDelayMap.delete(startValue);
+        startTiming();
+      }, delay);
+      this._valueDelayMap.set(startValue, timeoutId);
     }
     else {
-      startAnimated();
+      startTiming();
     }
-  },
-  cancel: () => {
-    
+    this._valueMap.set(startValue, true);
+  }
+
+  cancel() {
+    this._valueMap.forEach(value => {
+      Animated.timing(value).stop();
+    });
+    this._valueDelayMap.forEach(timeoutId => {
+      clearTimeout(timeoutId);
+    });
   }
 }
+
+const flipAnimatedTweener = new AnimatedTweener();
 
 const imageLoader = new ImageLoader(baseUrl, manifestLocation, loadNativeImage);
 
@@ -83,7 +100,8 @@ class Index extends Component {
     this.state = {
       orientation: Orientation.getInitialOrientation(),
       width: Dimensions.get('window').width,
-      height: Dimensions.get('window').height
+      height: Dimensions.get('window').height,
+      useRaf: DEFAULT_USE_RAF
     };
     Orientation.addOrientationListener(this.onOrientationChange);
     Dimensions.addEventListener("change", this.onDimensionsChange);
@@ -105,8 +123,14 @@ class Index extends Component {
     });
   }
 
+  onUseRafPress = () => {
+    this.setState(state => ({
+      useRaf: !state.useRaf
+    }));
+  }
+
   render() {
-    const { width, height } = this.state;
+    const { useRaf, width, height } = this.state;
 
     const basePlatformProps = {
       setValue: v => v,
@@ -125,7 +149,7 @@ class Index extends Component {
     };
 
     const rootProps = {
-      tweener: USE_RAF ? flipTweener : flipAnimatedTweener,
+      tweener: useRaf ? flipTweener : flipAnimatedTweener,
       imageLoader: imageLoader,
       width,
       height,
@@ -134,7 +158,7 @@ class Index extends Component {
       flipDuration: 1000,
       flipInterval: 5000,
       runTimer: false,
-      platformProps: USE_RAF ? basePlatformProps : {
+      platformProps: useRaf ? basePlatformProps : {
           ...basePlatformProps,
         setValue: v => new Animated.Value(v),
         FlipperImageView: props => <Animated.View {...props} />,
@@ -146,7 +170,14 @@ class Index extends Component {
     };
 
     return (
-      <Root {...rootProps} />
+      <View style={{ position: 'relative', width, height }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, width, height }}>
+          <Root key={useRaf} {...rootProps} />
+        </View>
+        <TouchableOpacity onPress={this.onUseRafPress} style={{ top: 45, left: 15, width: 20, height: 20 }}>
+          <View style={{ width: '100%', height: '100%', backgroundColor: useRaf ? 'blue' : 'green' }}/>
+        </TouchableOpacity>
+      </View>
     );
   }
 
