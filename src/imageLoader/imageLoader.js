@@ -5,6 +5,8 @@ export function ImageLoader(baseUrl, manifestLocation, loadImagePromise) {
   this._images = [];
   this._imagesLoadedByLocation = new Map();
   this._error = null;
+  this._imageLoadedListeners = new Map();
+  this._manifestLoadedListeners = new Map();
 }
 
 ImageLoader.prototype = {
@@ -40,19 +42,27 @@ ImageLoader.prototype = {
     return this._error;
   },
 
-  onImageLoad(callback) {
-    this._onImageLoad = callback;
+  addImageLoadCallback(callback) {
+    this._imageLoadedListeners.set(callback, callback);
   },
 
-  onManifestLoad(callback) {
-    this._onManifestLoad = callback;
+  addManifestLoadCallback(callback) {
+    this._manifestLoadedListeners.set(callback, callback);
+  },
+
+  removeImageLoadCallback(callback) {
+    this._imageLoadedListeners.delete(callback);
+  },
+
+  removeManifestLoadCallback(callback) {
+    this._manifestLoadedListeners.delete(callback);
   },
 
   loadImage(imageLocation, index) {
     this._loadImagePromise(this._baseUrl + imageLocation).then(() => {
       this._imagesLoadedByLocation.set(imageLocation, true);
-      if (this._onImageLoad) {
-        this._onImageLoad(imageLocation, index);
+      if (this._imageLoadedListeners.size > 0) {
+        this._imageLoadedListeners.forEach(listener => listener(imageLocation, index));
       }
     });
   },
@@ -66,17 +76,20 @@ ImageLoader.prototype = {
     }
   },
 
-  loadError(error, manifestLocation) {
+  loadError(error) {
     this._error = error;
     console.log('imageLoader loadError: ' + error.message + ' ' + this.manifestUrl);
   },
 
   loadManifest() {
+    this._images = [];
+    this._imagesLoadedByLocation = new Map();
+    this._error = null;
     fetch(this.manifestUrl)
       .then(response => response.json())
       .then(data => {
-        if (this._onManifestLoad) {
-          this._onManifestLoad(data.images);
+        if (this._manifestLoadedListeners.size > 0) {
+          this._manifestLoadedListeners.forEach(listener => listener(data.images));
         }
         this.loadImages(data.images);
       })

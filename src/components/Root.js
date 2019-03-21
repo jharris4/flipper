@@ -6,8 +6,8 @@ export default class Root extends Component {
   constructor(props) {
     super(props);
     const { imageLoader } = props;
-    imageLoader.onManifestLoad(this.onManifestLoad);
-    imageLoader.onImageLoad(this.onImageLoad);
+    imageLoader.addManifestLoadCallback(this.onManifestLoad);
+    imageLoader.addImageLoadCallback(this.onImageLoad);
     // load the list of images
     imageLoader.loadManifest();
     this.state = {
@@ -133,6 +133,7 @@ export default class Root extends Component {
         delay: flipDelay,
         duration: flipDuration,
         update: percentage => {
+          // this is only called when useRaf == true, Animated does its own interpolation
           const { indexState } = this.state;
           const { flipPercentages } = indexState;
           flipPercentages.set(index, setValue(percentage));
@@ -185,8 +186,8 @@ export default class Root extends Component {
       this.timerIntervalID = null;
     }
     if (this.props.imageLoader) {
-      this.props.imageLoader.onManifestLoad(null);
-      this.props.imageLoader.onImageLoad(null);
+      this.props.imageLoader.removeManifestLoadCallback(this.onManifestLoad);
+      this.props.imageLoader.removeImageLoadCallback(this.onImageLoad);
     }
   }
 
