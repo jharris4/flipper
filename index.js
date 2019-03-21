@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, Dimensions, TouchableOpacity, View, Image, ScrollView, Animated } from 'react-native';
+import { AppRegistry, Dimensions, TouchableOpacity, View, Image, ScrollView, Animated, Text } from 'react-native';
 import Orientation from 'react-native-orientation';
 import imageCacheHoc from 'react-native-image-cache-hoc';
 const CachedImage = imageCacheHoc(Image, { validProtocols: ['http', 'https'] });
@@ -175,7 +175,9 @@ class Index extends Component {
           <Root key={useRaf} {...rootProps} />
         </View>
         <TouchableOpacity onPress={this.onUseRafPress} style={{ top: 45, left: 15, width: 20, height: 20 }}>
-          <View style={{ width: '100%', height: '100%', backgroundColor: useRaf ? 'blue' : 'green' }}/>
+          <View style={{ width: '100%', height: '100%', backgroundColor: useRaf ? 'blue' : 'green' }}>
+            <Text style={{ textAlign: 'center', textAlignVertical: 'center' }}>{useRaf ? 'R' : 'A'}</Text>
+          </View>
         </TouchableOpacity>
       </View>
     );
