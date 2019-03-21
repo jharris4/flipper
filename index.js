@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, Dimensions, TouchableOpacity, View, Image, ScrollView, Animated, Text } from 'react-native';
+import { AppRegistry, Dimensions, TouchableOpacity, View, Image, ScrollView, Animated, Easing, Text } from 'react-native';
 import Orientation from 'react-native-orientation';
 import imageCacheHoc from 'react-native-image-cache-hoc';
 const CachedImage = imageCacheHoc(Image, { validProtocols: ['http', 'https'] });
@@ -61,6 +61,7 @@ class AnimatedTweener {
       Animated.timing(startValue, {
         toValue: 1,
         duration: duration,
+        easing: Easing.linear,
         useNativeDriver: true,
       }).start(() => {
         this._valueMap.delete(startValue);
