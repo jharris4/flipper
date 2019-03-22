@@ -69,22 +69,31 @@ export default class Root extends Component {
 
     if (loadedImageCount + 1 === images.length && runTimer) {
       const  { flipInterval } = this.props;
-      this.timerIntervalID = setInterval(this.startTimer, flipInterval);
+      this.timerIntervalID = setInterval(this.runTimer, flipInterval);
     }
   }
 
-  startTimer = () => {
+  runTimer = () => {
+    const { flipMode } = this.props;
     const { indexState } = this.state;
     const { backImages } = indexState;
-    const firstIndex = this.getRandomNonTweeningImageIndex();
-    if (firstIndex !== void 0) {
-      const swapIndex = this.getRandomNonTweeningImageIndex(firstIndex);
-      if (swapIndex !== void 0) {
-        this.tweenFlip({ index: firstIndex, image: backImages.get(swapIndex) });
-        this.tweenFlip({ index: swapIndex, image: backImages.get(firstIndex) });
+    if (flipMode === 'random') {
+      const firstIndex = this.getRandomNonTweeningImageIndex();
+      if (firstIndex !== void 0) {
+        const swapIndex = this.getRandomNonTweeningImageIndex(firstIndex);
+        if (swapIndex !== void 0) {
+          this.tweenFlip({ index: firstIndex, image: backImages.get(swapIndex) });
+          this.tweenFlip({ index: swapIndex, image: backImages.get(firstIndex) });
+        }
       }
     }
-  };
+    else if (flipMode === 'shift') {
+      const imageSize = backImages.size; // This should be the same as images.length
+      backImages.forEach((backImage, index) => {
+        this.tweenFlip({ index: (index+1) % imageSize, image: backImage });
+      });
+    }
+  }
 
   getRandomNonTweeningImageIndex(excludeIndex) {
     const { images, indexState } = this.state;
@@ -113,66 +122,80 @@ export default class Root extends Component {
       const { platformProps } = this.props;
       const { setValue } = platformProps;
       const { flipDelay, flipDuration } = this.props;
-      const { indexState } = this.state;
-      const { tweenFlags, frontImages, flipPercentages } = indexState;
-      tweenFlags.set(index, true);
-      frontImages.set(index, image);
       const flipPercentage = setValue(0);
-      flipPercentages.set(index, flipPercentage);
-      this.setState(state => stateUpdater({
-        ...state, indexState: {
-          ...state.indexState,
-          tweenFlags: new Map(tweenFlags),
-          frontImages: new Map(frontImages),
-          flipPercentages: new Map(flipPercentages)
-        }
-      }));
+      this.setState(state => {
+        const { indexState } = state;
+        const { tweenFlags, frontImages, flipPercentages } = indexState;
+        tweenFlags.set(index, true);
+        frontImages.set(index, image);
+        flipPercentages.set(index, flipPercentage);
+        return stateUpdater({
+          ...state,
+          indexState: {
+            ...state.indexState,
+            tweenFlags: new Map(tweenFlags),
+            frontImages: new Map(frontImages),
+            flipPercentages: new Map(flipPercentages)
+          }
+        });
+      });
 
       this.props.tweener.start({
         startValue: flipPercentage,
+        index: index,
         delay: flipDelay,
         duration: flipDuration,
         update: percentage => {
           // this is only called when useRaf == true, Animated does its own interpolation
-          const { indexState } = this.state;
-          const { flipPercentages } = indexState;
-          flipPercentages.set(index, setValue(percentage));
-          this.setState(state => ({
-            ...state, indexState: {
-              ...state.indexState,
-              flipPercentages: new Map(flipPercentages)
-            }
-          }));
+          this.setState(state => {
+            const { indexState } = state;
+            const { flipPercentages } = indexState;
+            flipPercentages.set(index, setValue(percentage));
+            return {
+              ...state,
+              indexState: {
+                ...state.indexState,
+                flipPercentages: new Map(flipPercentages)
+              }
+            };
+          });
         },
         complete: () => {
-          const { indexState } = this.state;
-          const { tweenFlags, frontImages, backImages, flipPercentages } = indexState;
-          tweenFlags.delete(index);
-          frontImages.delete(index);
-          backImages.set(index, image);
-          flipPercentages.set(index, setValue(0));
-          this.setState(state => ({
-            ...state, indexState: {
-              ...state.indexState,
-              tweenFlags: new Map(tweenFlags),
-              frontImages: new Map(frontImages),
-              flipPercentages: new Map(flipPercentages)
-            }
-          }));
+          this.setState(state => {
+            const { indexState } = state;
+            const { tweenFlags, frontImages, backImages, flipPercentages } = indexState;
+            tweenFlags.delete(index);
+            backImages.set(index, frontImages.get(index));
+            frontImages.delete(index);
+            flipPercentages.set(index, setValue(0));
+            return {
+              ...state,
+              indexState: {
+                ...state.indexState,
+                tweenFlags: new Map(tweenFlags),
+                backImages: new Map(backImages),
+                frontImages: new Map(frontImages),
+                flipPercentages: new Map(flipPercentages)
+              }
+            };
+          });
         }
       });
     }
   }
 
   onImageClick = (index) => {
-    const { indexState } = this.state;
-    const { tweenFlags, backImages } = indexState;
-    if (!tweenFlags.get(index)) {
-      const swapIndex = this.getRandomNonTweeningImageIndex(index);
+    const { flipMode } = this.props;
+    if (flipMode === 'random') {
+      const { images, indexState } = this.state;
+      const { tweenFlags, backImages } = indexState;
+      if (!tweenFlags.get(index)) {
+        const swapIndex = this.getRandomNonTweeningImageIndex(index);
 
-      if (swapIndex !== void 0) {
-        this.tweenFlip({ index: index, image: backImages.get(swapIndex) });
-        this.tweenFlip({ index: swapIndex, image: backImages.get(index) });
+        if (swapIndex !== void 0) {
+          this.tweenFlip({ index: index, image: backImages.get(swapIndex) });
+          this.tweenFlip({ index: swapIndex, image: backImages.get(index) });
+        }
       }
     }
   }

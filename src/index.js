@@ -73,10 +73,11 @@ const rootProps = {
   tweener: flipTweener,
   imageLoader: imageLoader,
   baseUrl: baseUrl,
-  flipDelay: 5,
+  flipMode: 'shift', // 'random' or 'shift'
+  flipDelay: 0,
   flipDuration: 1000,
-  flipInterval: 5000,
-  runTimer: false,
+  flipInterval: 2000,
+  runTimer: true,
   platformProps: {
     setValue: v => v,
     FlipperScrollView: props => <div {...props} />,

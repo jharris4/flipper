@@ -49,31 +49,31 @@ class AnimatedTweener {
     this._valueDelayMap = new Map();
   }
 
-  start({ delay, duration, complete, startValue}) {
-    if (this._valueMap.get(startValue)) {
+  start({ delay, duration, complete, startValue, index }) {
+    if (this._valueMap.get(index)) {
       Animated.timing(startValue).stop();
     }
-    if (this._valueDelayMap.get(startValue)) {
-      clearTimeout(this._valueDelayMap.get(startValue));
+    if (this._valueDelayMap.get(index)) {
+      clearTimeout(this._valueDelayMap.get(index));
     }
     const startTiming = () => {
-      this._valueMap.set(startValue, true);
+      this._valueMap.set(index, true);
       Animated.timing(startValue, {
         toValue: 1,
         duration: duration,
         easing: Easing.linear,
         useNativeDriver: true,
       }).start(() => {
-        this._valueMap.delete(startValue);
+        this._valueMap.delete(index);
         complete();
       });
     }
     if (delay > 0) {
       const timeoutId = setTimeout(() => {
-        this._valueDelayMap.delete(startValue);
+        this._valueDelayMap.delete(index);
         startTiming();
       }, delay);
-      this._valueDelayMap.set(startValue, timeoutId);
+      this._valueDelayMap.set(index, timeoutId);
     }
     else {
       startTiming();
@@ -159,10 +159,11 @@ class Index extends Component {
       width,
       height,
       baseUrl,
-      flipDelay: 5,
+      flipMode: 'shift', // 'random' or 'shift'
+      flipDelay: 0,
       flipDuration: 1000,
-      flipInterval: 5000,
-      runTimer: false,
+      flipInterval: 2000,
+      runTimer: true,
       platformProps: useRaf ? basePlatformProps : {
           ...basePlatformProps,
         setValue: v => new Animated.Value(v),
